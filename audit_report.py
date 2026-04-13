@@ -1,7 +1,7 @@
 import os
 import requests
 import smtplib
-import sys  # 경로 확인을 위해 추가하면 좋습니다
+import sys
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
@@ -14,9 +14,7 @@ def is_similar(a, b):
 
 # [수정됨] 네이버 뉴스 검색 API 함수
 def get_naver_news_html(keyword, seen_titles, client_id, client_secret):
-    # sort=sim(관련도순), sort=date(최신순)
     url = f"https://openapi.naver.com/v1/search/news.json?query={keyword}&display=10&sort=date"
-
     headers = {
         "X-Naver-Client-Id": client_id,
         "X-Naver-Client-Secret": client_secret
@@ -33,7 +31,6 @@ def get_naver_news_html(keyword, seen_titles, client_id, client_secret):
             <ul style='list-style-type: none; padding-left: 0; margin-bottom: 0;'>
         """      
         
-        # [강화된 차단 키워드 리스트] - 쉼표 오타 수정 및 단어 보강
         exclude_terms = [
             '배구', '스포츠', 'V리그', '배구단', '감독', '블랑', '챔프전', '우승', '경기', '득점', '승리', '리그', 'MVP', '한선수', '선수',
             '연예', '방송', '드라마', '영화', '출연', '배우', '가수', '아이돌', '하정우', '공연', '티켓', '예매',
@@ -46,32 +43,24 @@ def get_naver_news_html(keyword, seen_titles, client_id, client_secret):
         one_day_ago = datetime.now(kst) - timedelta(days=1)
 
         for item in data['items']:
-            # 제목(title)과 본문 요약(description)을 모두 정제하여 합칩니다.
             title = item['title'].replace("<b>", "").replace("</b>", "").replace("&quot;", '"').replace("&amp;", "&")
             desc = item['description'].replace("<b>", "").replace("</b>", "").replace("&quot;", '"').replace("&amp;", "&")
             link = item['link']
             pub_date = datetime.strptime(item['pubDate'], '%a, %d %b %Y %H:%M:%S +0900').replace(tzinfo=kst)
 
-            # --- 필터링 로직 시작 ---
-            
-            # 1. 날짜 체크
             if pub_date < one_day_ago: continue
             
-            # 2. [강화] 제목 뿐만 아니라 본문 요약까지 검사합니다.
             full_text = title + " " + desc
             if any(term in full_text for term in exclude_terms):
                 continue
             
-            # 3. 중복 및 유사도 체크
             is_duplicate = False
             for seen_title in seen_titles:
-                # 앞부분 20자 유사도 비교 (더 엄격하게 0.5로 조정 가능)
                 if is_similar(title[:20], seen_title[:20]) > 0.6:
                     is_duplicate = True
                     break
             if is_duplicate: continue
                 
-            # --- 필터링 통과 시 리스트 추가 ---
             seen_titles.append(title)
             html_segment += f"<li style='margin-bottom: 10px;'><a href='{link}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {title}</a></li>"
             
@@ -86,13 +75,11 @@ def get_naver_news_html(keyword, seen_titles, client_id, client_secret):
         return ""
 
 def send_audit_report(html_content, image_path):
-    # --- [사용자 설정] ---
     send_email_addr = "hcsaudit.news@gmail.com"
-    app_pw = os.getenv('EMAIL_PW') # 구글 앱 비밀번호 16자리
+    app_pw = os.getenv('EMAIL_PW')
     display_name = "현대캐피탈 감사실"
     target_emails = os.getenv('TARGET_EMAILS')
     additional_text = "※ 인터넷 공간, 외부메일조회 시스템에서 뉴스별 링크 접근이 가능합니다."
-    # --------------------
 
     kst = timezone(timedelta(hours=9))
     now_kst = datetime.now(kst)
@@ -139,21 +126,24 @@ def send_audit_report(html_content, image_path):
         server.login(send_email_addr, app_pw)
         server.send_message(msg)
 
+# [가장 중요한 부분] 실행 시작점 정의
+if __name__ == "__main__":
+    # API 키 로드
+    NAVER_ID = os.getenv('NAVER_ID')
+    NAVER_SECRET = os.getenv('NAVER_SECRET')
 
-
-# 2. [수정] 이미지 경로 설정 로직
-    # 현재 파이썬 파일이 있는 위치를 기준으로 'hcs.png' 파일의 절대 경로를 찾습니다.
+    # 이미지 경로 설정
     base_path = os.path.dirname(os.path.abspath(__file__))
     image_file = os.path.join(base_path, "hcs.png") 
 
-    # [디버깅 로그] GitHub Actions 로그에서 파일 존재 여부를 확인하기 위함
+    # 디버깅 로그
     print(f"이미지 확인용 경로: {image_file}")
     if os.path.exists(image_file):
         print("✅ 이미지 파일을 성공적으로 찾았습니다.")
     else:
         print("❌ 이미지 파일이 없습니다. GitHub에 'hcs.png'가 업로드 되었는지 확인하세요.")
 
-    # 3. 키워드 설정
+    # 뉴스 수집 로직
     audit_keywords = ["현대캐피탈", "내부통제", "횡령", "캐피탈 대출사고", "리스/할부",
                       "여신금융 금감원 검사", "금융권 내부통제 사고"]
 
