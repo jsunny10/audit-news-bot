@@ -1,6 +1,5 @@
 name: Daily Audit News Report
 
-# ⚠️ 'on' 바로 아래 줄은 공백 2칸으로 들여쓰기 되어야 합니다.
 on:
   schedule:
     - cron: '0 23 * * *'
