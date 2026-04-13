@@ -2,23 +2,21 @@ name: Daily Audit News Report
 
 on:
   schedule:
-    # UTC 기준 23시 = 한국 시각 아침 8시
     - cron: '0 23 * * *'
-  workflow_dispatch: # 버튼 눌러서 수동 실행도 가능하게 함
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 아래 env 부분을 추가하여 Node.js 24를 강제로 사용하게 합니다.
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      # v4에서 v5로 업데이트 (Node 24를 정식 지원하는 최신 버전)
+      uses: actions/checkout@v5 
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      # v5에서 v6로 업데이트 (Node 24를 정식 지원하는 최신 버전)
+      uses: actions/setup-python@v6 
       with:
         python-version: '3.9'
 
@@ -28,7 +26,6 @@ jobs:
 
     - name: Run Python Script
       env:
-        # Secrets에 저장한 값들을 파이썬에서 쓸 수 있게 연결
         NAVER_ID: ${{ secrets.NAVER_CLIENT_ID }}
         NAVER_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
         EMAIL_PW: ${{ secrets.EMAIL_PW }}
