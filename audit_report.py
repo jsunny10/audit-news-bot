@@ -139,20 +139,28 @@ def send_audit_report(html_content, image_path):
         server.login(send_email_addr, app_pw)
         server.send_message(msg)
 
-if __name__ == "__main__":
-    # 1. 발급받은 네이버 API 키를 입력하세요
-    NAVER_ID = os.getenv('NAVER_ID')
-    NAVER_SECRET = os.getenv('NAVER_SECRET')
 
-    image_file = "hcs.png"
-    audit_keywords = ["현대캐피탈", "내부통제", "횡령","캐피탈 대출사고", "리스/할부",
-        "여신금융 금감원 검사", "금융권 내부통제 사고"]
+
+# 2. [수정] 이미지 경로 설정 로직
+    # 현재 파이썬 파일이 있는 위치를 기준으로 'hcs.png' 파일의 절대 경로를 찾습니다.
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    image_file = os.path.join(base_path, "hcs.png") 
+
+    # [디버깅 로그] GitHub Actions 로그에서 파일 존재 여부를 확인하기 위함
+    print(f"이미지 확인용 경로: {image_file}")
+    if os.path.exists(image_file):
+        print("✅ 이미지 파일을 성공적으로 찾았습니다.")
+    else:
+        print("❌ 이미지 파일이 없습니다. GitHub에 'hcs.png'가 업로드 되었는지 확인하세요.")
+
+    # 3. 키워드 설정
+    audit_keywords = ["현대캐피탈", "내부통제", "횡령", "캐피탈 대출사고", "리스/할부",
+                      "여신금융 금감원 검사", "금융권 내부통제 사고"]
 
     titles_tracker = []
     final_html_body = ""
 
     for kw in audit_keywords:
-        # 네이버 API 함수 호출
         final_html_body += get_naver_news_html(kw, titles_tracker, NAVER_ID, NAVER_SECRET)
 
     if final_html_body:
