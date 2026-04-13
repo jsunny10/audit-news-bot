@@ -101,10 +101,14 @@ def send_audit_report(html_content, image_path):
           </div>
           
           <div style="padding: 25px;">
-            <div style="margin-bottom: 20px;">
-                <p style="text-align: right; font-size: 9pt; color: #888; margin: 0;">발송 시각: {date_str} {time_str} </p>
-                <p style="text-align: right; font-size: 11pt; color: #000; font-weight: bold; margin: 5px 0 0 0;">{additional_text}</p>
-            </div>
+            <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
+              <tr>
+                <td align="right" style="text-align: right;">
+                  <p style="font-size: 9pt; color: #888; margin: 0; text-align: right;">발송 시각: {date_str} {time_str} </p>
+                  <p style="font-size: 11pt; color: #000; font-weight: bold; margin: 5px 0 0 0; text-align: right;">{additional_text}</p>
+                </td>
+              </tr>
+            </table>
 
             <div style="text-align: left;">
                 <h2 style="color: #2c3e50; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 10px;">📋 키워드별 주요 뉴스 </h2>
@@ -146,7 +150,7 @@ if __name__ == "__main__":
     else:
         print("❌ 이미지 파일이 없습니다. GitHub에 'hcs.png'가 업로드 되었는지 확인하세요.")
 
-    audit_keywords = ["현대캐피탈", "내부통제", "횡령", "캐피탈 대출사고", "리스/할부",
+    audit_keywords = ["현대캐피탈", "내부통제", "횡령", "캐피탈업계", "리스/할부",
                       "여신금융 금감원 검사", "금융권 내부통제 사고"]
 
     titles_tracker = []
