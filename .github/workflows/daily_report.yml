@@ -1,5 +1,6 @@
 name: Daily Audit News Report
 
+# ⚠️ 'on' 바로 아래 줄은 공백 2칸으로 들여쓰기 되어야 합니다.
 on:
   schedule:
     - cron: '0 23 * * *'
@@ -11,12 +12,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      # v4에서 v5로 업데이트 (Node 24를 정식 지원하는 최신 버전)
-      uses: actions/checkout@v5 
+      uses: actions/checkout@v5
 
     - name: Set up Python
-      # v5에서 v6로 업데이트 (Node 24를 정식 지원하는 최신 버전)
-      uses: actions/setup-python@v6 
+      uses: actions/setup-python@v6
       with:
         python-version: '3.9'
 
