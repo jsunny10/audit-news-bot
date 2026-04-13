@@ -1,0 +1,32 @@
+name: Daily Audit News Report
+
+on:
+  schedule:
+    # UTC 기준 23시 = 한국 시각 아침 8시
+    - cron: '0 23 * * *'
+  workflow_dispatch: # 버튼 눌러서 수동 실행도 가능하게 함
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        pip install requests beautifulsoup4
+
+    - name: Run Python Script
+      env:
+        # Secrets에 저장한 값들을 파이썬에서 쓸 수 있게 연결
+        NAVER_ID: ${{ secrets.NAVER_CLIENT_ID }}
+        NAVER_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+        EMAIL_PW: ${{ secrets.EMAIL_PW }}
+      run: python audit_report.py
