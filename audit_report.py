@@ -99,13 +99,15 @@ def send_audit_report(html_content, image_path):
           <div style="text-align: center; background-color: #000;">
             <img src="cid:header_logo" style="width: 100%; display: block; max-width: 650px;">
           </div>
-          <div style="padding: 25px;">
-            <p style="text-align: right; font-size: 9pt; color: #888; margin-top: 0; margin-bottom: 5px;">발송 시각: {date_str} {time_str} (KST)</p>
-            <p style="text-align: right; font-size: 11pt; color: #000; font-weight: bold; margin-top: 0; margin-bottom: 20px;">{additional_text}</p>
-            <h2 style="color: #2c3e50; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 10px;">📋 키워드별 주요 뉴스 </h2>
-            {html_content}
-            <div style="background-color: #f4f7f9; padding: 20px; font-size: 9pt; color: #7f8c8d; text-align: center; border-radius: 8px; margin-top: 30px;">
-                <strong style="color: #e74c3c;">⭐</strong>  본 리포트는 현대캐피탈 감사 업무 지원을 위해 자동 생성되었습니다.
+          <div style="text-align: right;">
+            <div style="padding: 25px;">
+                <p style="text-align: right; font-size: 9pt; color: #888; margin-top: 0; margin-bottom: 5px;">발송 시각: {date_str} {time_str} </p>
+                <p style="text-align: right; font-size: 11pt; color: #000; font-weight: bold; margin-top: 0; margin-bottom: 20px;">{additional_text}</p>
+                <h2 style="color: #2c3e50; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 10px;">📋 키워드별 주요 뉴스 </h2>
+                {html_content}
+                <div style="background-color: #f4f7f9; padding: 20px; font-size: 9pt; color: #7f8c8d; text-align: center; border-radius: 8px; margin-top: 30px;">
+                    <strong style="color: #e74c3c;">⭐</strong>  본 리포트는 현대캐피탈 감사 업무 지원을 위해 자동 생성되었습니다.
+                </div>
             </div>
           </div>
         </div>
