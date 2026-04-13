@@ -101,9 +101,9 @@ def send_audit_report(html_content, image_path):
           </div>
           
           <div style="padding: 25px;">
-            <div style="text-align: right; margin-bottom: 20px;">
-                <p style="font-size: 9pt; color: #888; margin: 0;">발송 시각: {date_str} {time_str} (KST)</p>
-                <p style="font-size: 11pt; color: #000; font-weight: bold; margin: 5px 0 0 0;">{additional_text}</p>
+            <div style="margin-bottom: 20px;">
+                <p style="text-align: right; font-size: 9pt; color: #888; margin: 0;">발송 시각: {date_str} {time_str} </p>
+                <p style="text-align: right; font-size: 11pt; color: #000; font-weight: bold; margin: 5px 0 0 0;">{additional_text}</p>
             </div>
 
             <div style="text-align: left;">
