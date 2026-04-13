@@ -87,9 +87,9 @@ def get_naver_news_html(keyword, seen_titles, client_id, client_secret):
 def send_audit_report(html_content, image_path):
     # --- [사용자 설정] ---
     send_email_addr = "hcsaudit.news@gmail.com"
-    app_pw = "dirafeldltiqykla" # 구글 앱 비밀번호 16자리
+    app_pw = os.getenv('EMAIL_PW') # 구글 앱 비밀번호 16자리
     display_name = "현대캐피탈 감사실"
-    target_emails = "jungsun8610@gmail.com" # 받는 사람 (쉼표 구분)  , minchae.jo@hcs.com, junggyu.kim@hcs.com
+    target_emails = os.getenv('TARGET_EMAILS')
     additional_text = "※ 인터넷 공간, 외부메일조회 시스템에서 뉴스별 링크 접근이 가능합니다."
     # --------------------
 
@@ -140,8 +140,8 @@ def send_audit_report(html_content, image_path):
 
 if __name__ == "__main__":
     # 1. 발급받은 네이버 API 키를 입력하세요
-    NAVER_ID = "lwgMUxvvwypuvxbhy6KT"
-    NAVER_SECRET = "AFHlFz8bGK"
+    NAVER_ID = os.getenv('NAVER_ID')
+    NAVER_SECRET = os.getenv('NAVER_SECRET')
 
     image_file = "/hcs.png"
     audit_keywords = ["현대캐피탈", "내부통제", "횡령","캐피탈 대출사고", "리스/할부",
