@@ -12,7 +12,7 @@ from difflib import SequenceMatcher
 def is_similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-# [수정됨] 네이버 뉴스 검색 API 함수
+# 네이버 뉴스 검색 API 함수
 def get_naver_news_html(keyword, seen_titles, client_id, client_secret):
     url = f"https://openapi.naver.com/v1/search/news.json?query={keyword}&display=10&sort=date"
     headers = {
@@ -62,7 +62,7 @@ def get_naver_news_html(keyword, seen_titles, client_id, client_secret):
             if is_duplicate: continue
                 
             seen_titles.append(title)
-            html_segment += f"<li style='margin-bottom: 10px;'><a href='{link}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {title}</a></li>"
+            html_segment += f"<li style='margin-bottom: 10px; text-align: left;'><a href='{link}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {title}</a></li>"
             
             count += 1
             if count >= 3: break
@@ -99,15 +99,20 @@ def send_audit_report(html_content, image_path):
           <div style="text-align: center; background-color: #000;">
             <img src="cid:header_logo" style="width: 100%; display: block; max-width: 650px;">
           </div>
-          <div style="text-align: right;">
-            <div style="padding: 25px;">
-                <p style="text-align: right; font-size: 9pt; color: #888; margin-top: 0; margin-bottom: 5px;">발송 시각: {date_str} {time_str} </p>
-                <p style="text-align: right; font-size: 11pt; color: #000; font-weight: bold; margin-top: 0; margin-bottom: 20px;">{additional_text}</p>
+          
+          <div style="padding: 25px;">
+            <div style="text-align: right; margin-bottom: 20px;">
+                <p style="font-size: 9pt; color: #888; margin: 0;">발송 시각: {date_str} {time_str} (KST)</p>
+                <p style="font-size: 11pt; color: #000; font-weight: bold; margin: 5px 0 0 0;">{additional_text}</p>
+            </div>
+
+            <div style="text-align: left;">
                 <h2 style="color: #2c3e50; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 10px;">📋 키워드별 주요 뉴스 </h2>
                 {html_content}
-                <div style="background-color: #f4f7f9; padding: 20px; font-size: 9pt; color: #7f8c8d; text-align: center; border-radius: 8px; margin-top: 30px;">
-                    <strong style="color: #e74c3c;">⭐</strong>  본 리포트는 현대캐피탈 감사 업무 지원을 위해 자동 생성되었습니다.
-                </div>
+            </div>
+
+            <div style="background-color: #f4f7f9; padding: 20px; font-size: 9pt; color: #7f8c8d; text-align: center; border-radius: 8px; margin-top: 30px;">
+                <strong style="color: #e74c3c;">⭐</strong> 본 리포트는 현대캐피탈 감사 업무 지원을 위해 자동 생성되었습니다.
             </div>
           </div>
         </div>
@@ -128,25 +133,20 @@ def send_audit_report(html_content, image_path):
         server.login(send_email_addr, app_pw)
         server.send_message(msg)
 
-# [가장 중요한 부분] 실행 시작점 정의
 if __name__ == "__main__":
-    # API 키 로드
     NAVER_ID = os.getenv('NAVER_ID')
     NAVER_SECRET = os.getenv('NAVER_SECRET')
 
-    # 이미지 경로 설정
     base_path = os.path.dirname(os.path.abspath(__file__))
     image_file = os.path.join(base_path, "hcs.png") 
 
-    # 디버깅 로그
     print(f"이미지 확인용 경로: {image_file}")
     if os.path.exists(image_file):
         print("✅ 이미지 파일을 성공적으로 찾았습니다.")
     else:
         print("❌ 이미지 파일이 없습니다. GitHub에 'hcs.png'가 업로드 되었는지 확인하세요.")
 
-    # 뉴스 수집 로직
-    audit_keywords = ["현대캐피탈", "내부통제", "횡령", "캐피탈 대출사", "리스/할부",
+    audit_keywords = ["현대캐피탈", "내부통제", "횡령", "캐피탈 대출사고", "리스/할부",
                       "여신금융 금감원 검사", "금융권 내부통제 사고"]
 
     titles_tracker = []
