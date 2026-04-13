@@ -8,6 +8,25 @@ from email.utils import formataddr, formatdate
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 
+
+import sys  # 경로 확인을 위해 추가하면 좋습니다
+
+# 1. 경로 설정 부분 (기존 image_path = "..." 부분을 이렇게 바꾸세요)
+# 현재 파이썬 파일이 있는 위치를 기준으로 절대 경로를 생성합니다.
+base_path = os.path.dirname(os.path.abspath(__file__))
+image_path = os.path.join(base_path, "image_d426e6.jpg")
+
+# [디버깅용] 파일이 실제로 있는지 로그로 확인 (GitHub Actions 로그에서 볼 수 있음)
+print(f"현재 작업 디렉토리: {os.getcwd()}")
+print(f"이미지 예상 경로: {image_path}")
+
+if os.path.exists(image_path):
+    print("✅ 이미지 파일을 성공적으로 찾았습니다.")
+else:
+    print("❌ 이미지 파일이 경로에 없습니다. 파일명을 다시 확인하세요.")
+
+
+
 def is_similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
