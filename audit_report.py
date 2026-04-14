@@ -100,7 +100,6 @@ if __name__ == "__main__":
     base_path = os.path.dirname(os.path.abspath(__file__))
     image_file = os.path.join(base_path, "hcs.png")
 
-    # 가중치 설정 (3점: 매우 중요, 2점: 중요, 1점: 일반)
     audit_categories = {
         "🏛️ 금감원 및 감독기구": {
             "금융감독원": 3, "금융감독원 검사": 2, "금감원 검사": 2, "금융감독원 제재": 2, "금감원 제재": 2, "금감원 횡령" : 1
@@ -128,10 +127,9 @@ if __name__ == "__main__":
             
             combined_items = ""
             for news in top_5_news:
-               # stars = "⭐" * news['score']
+                # 별표(stars) 변수를 제거하여 텍스트만 깔끔하게 나오도록 수정
                 combined_items += f"""
                 <li style='margin-bottom: 12px;'>
-                #   <span style='font-size: 8pt; color: #e67e22;'>{stars}</span><br>
                     <a href='{news['link']}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {news['title']}</a>
                 </li>"""
 
