@@ -180,8 +180,9 @@ if __name__ == "__main__":
 
     # 금감원 보도자료(fss_body)가 기존 코드에 정의되어 있다면 함께 발송
     # 만약 fss_body 변수가 없다면 아래 호출에서 fss_body 부분을 제거하거나 빈 값을 넣으세요.
-    fss_body = get_fss_announcements() if 'get_fss_announcements' in globals() else ""
+ #   fss_body = get_fss_announcements() if 'get_fss_announcements' in globals() else ""
 
     if final_html_body or fss_body:
-        send_audit_report(final_html_body, fss_body, image_file)
+ #       send_audit_report(final_html_body, fss_body, image_file)
+        send_audit_report(final_html_body, image_file)
         print("카테고리별 네이버 뉴스 리포트 발송 완료!")
