@@ -101,13 +101,13 @@ if __name__ == "__main__":
     # 가중치 설정 (3점: 매우 중요, 2점: 중요, 1점: 일반)
     audit_categories = {
         "🏛️ 금감원 및 감독기구": {
-            "금감원 제재": 3, "금융감독원 검사": 3, "여신금융 금감원 검사": 2
+            "금융감독원": 3, "금융감독원 검사": 2, "금감원 검사": 2, "금융감독원 제재": 2, "금감원 제재": 2, "금감원 횡령" : 1
         },
         "🏢 자사 및 업계 동향": {
-            "현대캐피탈 횡령": 3, "현대캐피탈": 2, "캐피탈업계 사고": 2, "리스/할부": 1
+            "현대캐피탈": 3, "캐피탈사 사고": 2, "리스/할부": 1
         },
         "⚠️ 내부통제 및 리스크": {
-            "금융권 내부통제": 3, "은행 횡령": 2, "금융사고 예방": 1
+            "금융권 내부통제": 3, "금융사고": 2, "보안사고": 2
         }
     }
 
@@ -126,10 +126,10 @@ if __name__ == "__main__":
             
             combined_items = ""
             for news in top_5_news:
-                stars = "⭐" * news['score']
+               # stars = "⭐" * news['score']
                 combined_items += f"""
                 <li style='margin-bottom: 12px;'>
-                    <span style='font-size: 8pt; color: #e67e22;'>{stars}</span><br>
+                #   <span style='font-size: 8pt; color: #e67e22;'>{stars}</span><br>
                     <a href='{news['link']}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {news['title']}</a>
                 </li>"""
 
