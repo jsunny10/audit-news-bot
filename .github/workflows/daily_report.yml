@@ -4,7 +4,7 @@ on:
   schedule:
     # 한국 시간 오후 5시 (UTC 08:00)
     # 가끔 0분 정각보다 5분, 10분 단위로 설정하면 더 잘 잡히기도 합니다.
-    - cron: '25 8 * * *'
+    - cron: '30 8 * * *'
   workflow_dispatch:
 
 jobs:
