@@ -73,6 +73,7 @@ def send_audit_report(html_content, image_path):
     msg['Subject'] = f"[{date_str}] Audit News Report ⭐"
     msg['From'] = formataddr(("현대캐피탈 감사실", send_email_addr))
     msg['To'] = target_emails
+    additional_text = "※ 인터넷 공간, 외부메일조회 시스템에서 뉴스별 링크 접근이 가능합니다."
 
     full_html = f"""
     <html><body style="font-family: 'Malgun Gothic', sans-serif;">
@@ -81,6 +82,7 @@ def send_audit_report(html_content, image_path):
                 <img src="cid:header_logo" style="max-width: 100%;">
             </div>
             <p style="text-align: right; font-size: 9pt; color: #888;">발송 시각: {now_kst.strftime('%H:%M')}</p>
+            <p style="font-size: 11pt; color: #000; font-weight: bold; margin: 5px 0 0 0; text-align: right;">{additional_text}</p>
             {html_content}
         </div>
     </body></html>
@@ -104,7 +106,7 @@ if __name__ == "__main__":
             "금융감독원": 3, "금융감독원 검사": 2, "금감원 검사": 2, "금융감독원 제재": 2, "금감원 제재": 2, "금감원 횡령" : 1
         },
         "🏢 자사 및 업계 동향": {
-            "현대캐피탈": 3, "캐피탈사 사고": 2, "리스/할부": 1
+            "현대캐피탈": 3, "캐피탈사 사고": 2, "캐피탈사 사기": 2,  "리스/할부": 1
         },
         "⚠️ 내부통제 및 리스크": {
             "금융권 내부통제": 3, "금융사고": 2, "보안사고": 2
