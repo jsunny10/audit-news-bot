@@ -151,15 +151,37 @@ if __name__ == "__main__":
     else:
         print("❌ 이미지 파일이 없습니다. GitHub에 'hcs.png'가 업로드 되었는지 확인하세요.")
 
-    audit_keywords = ["현대캐피탈", "내부통제", "횡령", "캐피탈업계", "리스/할부",
-                      "여신금융 금감원 검사", "금융권 내부통제 사고"]
+    # [수정] 키워드 카테고리화 설계
+    audit_categories = {
+        "🏛️ 금감원 및 감독기구": ["금감원 제재", "금융감독원 검사", "여신금융 금감원 검사"],
+        "🏢 자사 및 업계 동향": ["현대캐피탈", "캐피탈업계", "리스/할부"],
+        "⚠️ 내부통제 및 리스크": ["내부통제", "횡령", "금융권 내부통제 사고"]
+    }
 
     titles_tracker = []
     final_html_body = ""
 
-    for kw in audit_keywords:
-        final_html_body += get_naver_news_html(kw, titles_tracker, NAVER_ID, NAVER_SECRET)
+    # [수정] 카테고리별 뉴스 수집 로직
+    for category_name, keywords in audit_categories.items():
+        category_html = ""
+        
+        for kw in keywords:
+            # 기존에 정의된 뉴스 수집 함수 호출
+            category_html += get_naver_news_html(kw, titles_tracker, NAVER_ID, NAVER_SECRET)
+        
+        # 해당 카테고리에 수집된 뉴스가 있을 경우에만 섹션 추가
+        if category_html:
+            final_html_body += f"""
+            <div style="margin-top: 35px; border-bottom: 2px solid #2c3e50; padding-bottom: 5px; margin-bottom: 15px;">
+                <span style="font-size: 16pt; font-weight: bold; color: #2c3e50;">{category_name}</span>
+            </div>
+            {category_html}
+            """
 
-    if final_html_body:
-        send_audit_report(final_html_body, image_file)
-        print("네이버 뉴스 리포트 발송 완료!")
+    # 금감원 보도자료(fss_body)가 기존 코드에 정의되어 있다면 함께 발송
+    # 만약 fss_body 변수가 없다면 아래 호출에서 fss_body 부분을 제거하거나 빈 값을 넣으세요.
+    fss_body = get_fss_announcements() if 'get_fss_announcements' in globals() else ""
+
+    if final_html_body or fss_body:
+        send_audit_report(final_html_body, fss_body, image_file)
+        print("카테고리별 네이버 뉴스 리포트 발송 완료!")
