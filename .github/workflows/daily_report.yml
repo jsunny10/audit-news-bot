@@ -2,7 +2,7 @@ name: Daily Audit News Report
 
 on:
   schedule:
-    - cron: '0 23 * * *'
+    - cron: '30 4 * * *'
   workflow_dispatch:
 
 jobs:
