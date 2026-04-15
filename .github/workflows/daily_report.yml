@@ -2,36 +2,30 @@ name: Daily Audit News Report
 
 on:
   schedule:
-    # 한국 시간 오후 5시 (UTC 08:00)  -9시간
-    # 가끔 0분 정각보다 5분, 10분 단위로 설정하면 더 잘 잡히기도 합니다.
-    - cron: '3 6 * * *' 
+    # 한국 시간 오전 11시 10분 (UTC 02:10)
+    - cron: '3 6 * * *'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 권한 문제로 가끔 막히는 경우가 있어 권한 설정을 명시해줍니다.
-    permissions:
-      contents: read
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-    - name: Set up Python
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.9'
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.9'
 
-    - name: Install dependencies
-      run: |
-        pip install requests beautifulsoup4
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4
 
-    - name: Run Python Script
-      env:
-        NAVER_ID: ${{ secrets.NAVER_CLIENT_ID }}
-        NAVER_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
-        EMAIL_PW: ${{ secrets.EMAIL_PW }}
-        TARGET_EMAILS: ${{ secrets.TARGET_EMAILS }}
-      # 스크립트 실행 시 로그를 남겨서 확인하기 쉽게 합니다.
-      run: python audit_report.py
+      - name: Run Python Script
+        env:
+          NAVER_ID: ${{ secrets.NAVER_ID }}
+          NAVER_SECRET: ${{ secrets.NAVER_SECRET }}
+          EMAIL_PW: ${{ secrets.EMAIL_PW }}
+          TARGET_EMAILS: ${{ secrets.TARGET_EMAILS }}
+        run: python audit_report.py
