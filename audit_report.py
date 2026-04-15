@@ -4,25 +4,24 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
-from email.utils import formataddr, formatdate
+from email.utils import formataddr
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 
 def is_similar(a, b):
-    return SequenceMatcher(None, a, b).ratio()
+    # 제목의 앞부분 30자 정도를 비교하여 유사도를 측정합니다.
+    return SequenceMatcher(None, a[:30], b[:30]).ratio()
 
-# [복구] 뉴스 수집 및 제외 키워드 필터링 로직
 def get_naver_news_data(keyword, score, seen_titles, client_id, client_secret):
     url = f"https://openapi.naver.com/v1/search/news.json?query={keyword}&display=20&sort=date"
     headers = {"X-Naver-Client-Id": client_id, "X-Naver-Client-Secret": client_secret}
     
-    # 제외할 키워드 리스트
     exclude_terms = [
         '배구', '스포츠', 'V리그', '배구단', '감독', '블랑', '챔프전', '우승', '경기', '득점', '승리', '리그', 'MVP', '한선수', '선수',
-            '시상식', '한국배구연맹',
-            '연예', '방송', '드라마', '영화', '출연', '배우', '가수', '아이돌', '하정우', '공연', '티켓', '예매', '슬리피',
-            '데뷔', '컴백', '시청률', '예능', '넷플릭스', '유튜브', '구독자', '영상', '채널', '게임',
-            '콘서트', '팬미팅', '음원', '차트', '화보', '결혼', '이혼', '열애', '뮤지컬', '독점공개'
+        '시상식', '한국배구연맹', '연예', '방송', '드라마', '영화', '출연', '배우', '가수', '아이돌', '하정우', '공연', '티켓', '예매', '슬리피',
+        '데뷔', '컴백', '시청률', '예능', '넷플릭스', '유튜브', '구독자', '영상', '채널', '게임',
+        '콘서트', '팬미팅', '음원', '차트', '화보', '결혼', '이혼', '열애', '뮤지컬', '독점공개''배구', '스포츠', 'V리그', '감독', '우승', '경기', '득점', '승리', '리그', '선수',
+        '연예', '방송', '드라마', '영화', '배우', '가수', '아이돌', '데뷔', '컴백'
     ]
     
     news_items = []
@@ -39,15 +38,17 @@ def get_naver_news_data(keyword, score, seen_titles, client_id, client_secret):
             desc = item['description'].replace("<b>", "").replace("</b>", "").replace("&quot;", '"').replace("&amp;", "&")
             pub_date = datetime.strptime(item['pubDate'], '%a, %d %b %Y %H:%M:%S +0900').replace(tzinfo=kst)
             
-            # 1. 날짜 필터링 (최근 24시간)
+            # 1. 날짜 필터링
             if pub_date < one_day_ago: continue
             
-            # 2. 제외 키워드 필터링 (제목 + 본문 요약 검색)
+            # 2. 제외 키워드 필터링
             full_text = title + " " + desc
             if any(term in full_text for term in exclude_terms): continue
             
-            # 3. 중복 필터링
-            if any(is_similar(title[:20], s[:20]) > 0.6 for s in seen_titles): continue
+            # 3. 유사도 분석 (중복 뉴스 제외)
+            # 이미 저장된 제목들과 비교하여 50% 이상 유사하면 제외
+            if any(is_similar(title, s) > 0.5 for s in seen_titles):
+                continue
             
             seen_titles.append(title)
             news_items.append({
@@ -61,7 +62,6 @@ def get_naver_news_data(keyword, score, seen_titles, client_id, client_secret):
         return []
 
 def send_audit_report(html_content, image_path):
-    # 이메일 발송 설정 (기존과 동일)
     send_email_addr = "hcsaudit.news@gmail.com"
     app_pw = os.getenv('EMAIL_PW')
     target_emails = os.getenv('TARGET_EMAILS')
@@ -73,26 +73,33 @@ def send_audit_report(html_content, image_path):
     msg['Subject'] = f"[{date_str}] Audit News Report ⭐"
     msg['From'] = formataddr(("현대캐피탈 감사실", send_email_addr))
     msg['To'] = target_emails
-    additional_text = "※ 인터넷 공간, 외부메일조회 시스템에서 뉴스별 링크 접근이 가능합니다."
 
+    # HTML 수정: 이미지 주변의 검정 배경(#000)과 패딩을 제거했습니다.
     full_html = f"""
     <html><body style="font-family: 'Malgun Gothic', sans-serif;">
         <div style="max-width: 650px; margin: 0 auto; border: 1px solid #eee; padding: 25px;">
-            <div style="text-align: center; background-color: #000; padding: 10px;">
-                <img src="cid:header_logo" style="max-width: 100%;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="cid:header_logo" style="max-width: 100%; height: auto; border: none;">
             </div>
             <p style="text-align: right; font-size: 9pt; color: #888;">발송 시각: {now_kst.strftime('%H:%M')}</p>
-            <p style="font-size: 11pt; color: #000; font-weight: bold; margin: 5px 0 0 0; text-align: right;">{additional_text}</p>
+            <p style="font-size: 11pt; color: #000; font-weight: bold; margin: 5px 0 0 0; text-align: right;">※ 인터넷 공간, 외부메일조회 시스템에서 뉴스별 링크 접근이 가능합니다.</p>
             {html_content}
         </div>
     </body></html>
     """
     msg.attach(MIMEText(full_html, 'html'))
+    
     if os.path.exists(image_path):
         with open(image_path, 'rb') as f:
-            msg_img = MIMEImage(f.read()); msg_img.add_header('Content-ID', '<header_logo>'); msg.attach(msg_img)
+            msg_img = MIMEImage(f.read())
+            msg_img.add_header('Content-ID', '<header_logo>')
+            # 이미지 자체에 테두리가 생기지 않도록 설정
+            msg_img.add_header('Content-Disposition', 'inline', filename=os.path.basename(image_path))
+            msg.attach(msg_img)
+            
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(send_email_addr, app_pw); server.send_message(msg)
+        server.login(send_email_addr, app_pw)
+        server.send_message(msg)
 
 if __name__ == "__main__":
     NAVER_ID = os.getenv('NAVER_ID')
@@ -118,16 +125,15 @@ if __name__ == "__main__":
     for category_name, keywords_dict in audit_categories.items():
         category_all_news = []
         for kw, score in keywords_dict.items():
+            # 유사도 분석을 위해 titles_tracker를 계속 전달합니다.
             category_all_news.extend(get_naver_news_data(kw, score, titles_tracker, NAVER_ID, NAVER_SECRET))
         
         if category_all_news:
-            # 가중치 기준 정렬 후 상위 5개 추출
             category_all_news.sort(key=lambda x: x['score'], reverse=True)
             top_5_news = category_all_news[:5]
             
             combined_items = ""
             for news in top_5_news:
-                # 별표(stars) 변수를 제거하여 텍스트만 깔끔하게 나오도록 수정
                 combined_items += f"""
                 <li style='margin-bottom: 12px;'>
                     <a href='{news['link']}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {news['title']}</a>
@@ -144,4 +150,4 @@ if __name__ == "__main__":
 
     if final_html_body:
         send_audit_report(final_html_body, image_file)
-        print("제외 키워드 및 가중치 적용 완료!")
+        print("중복 제거 및 테두리 수정 완료!")
