@@ -36,7 +36,7 @@ def get_naver_news_data(keyword, score, seen_titles, client_id, client_secret):
         for item in data.get('items', []):
             title = item['title'].replace("<b>", "").replace("</b>", "").replace("&quot;", '"').replace("&amp;", "&")
             desc = item['description'].replace("<b>", "").replace("</b>", "").replace("&quot;", '"').replace("&amp;", "&")
-            pub_date = datetime.strptime(item['pubDate'], '%a, %d %b %Y %H:%M:%S +0900').replace(tzinfo=kst)
+            pub_date = datetime.strptime(item['pubDate'], '%a, %d %b %Y %H:%M:%S +0    900').replace(tzinfo=kst)
             
             # 1. 날짜 필터링
             if pub_date < one_day_ago: continue
@@ -45,12 +45,15 @@ def get_naver_news_data(keyword, score, seen_titles, client_id, client_secret):
             full_text = title + " " + desc
             if any(term in full_text for term in exclude_terms): continue
             
-            # 3. 유사도 분석 (중복 뉴스 제외)
-            # 이미 저장된 제목들과 비교하여 50% 이상 유사하면 제외
-            if any(is_similar(title, s) > 0.5 for s in seen_titles):
+            # 3. [핵심 수정] 내용 기반 유사도 분석
+            # 제목과 본문의 앞부분(예: 100자)을 합쳐서 비교합니다.
+            current_content = (title + " " + desc)[:100]
+            
+            # 기존에 수집된 뉴스들과 비교하여 50% 이상 유사하면 중복으로 간주
+            if any(is_similar(current_content, s) > 0.5 for s in seen_texts):
                 continue
             
-            seen_titles.append(title)
+            seen_texts.append(current_content)
             news_items.append({
                 "title": title,
                 "link": item['link'],
