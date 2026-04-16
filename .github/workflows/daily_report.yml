@@ -3,7 +3,7 @@ name: Daily Audit News Report
 on:
   schedule:
     # 한국 시간 오전 11시 10분 (UTC 02:10)  # 23시 3분 (UTC) / 한국시간 오전 8시 3분
-    - cron: '3 4 * * *'  
+    - cron: '25 4 * * *'  
   workflow_dispatch:
 
 jobs:
