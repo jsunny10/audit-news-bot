@@ -24,8 +24,8 @@ jobs:
 
       - name: Run Python Script
         env:
-          NAVER_ID: ${{ secrets.NAVER_ID }}
-          NAVER_SECRET: ${{ secrets.NAVER_SECRET }}
+          NAVER_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           EMAIL_PW: ${{ secrets.EMAIL_PW }}
           TARGET_EMAILS: ${{ secrets.TARGET_EMAILS }}
         run: python audit_report.py
