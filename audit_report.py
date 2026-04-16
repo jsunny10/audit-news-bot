@@ -1,6 +1,8 @@
 import os
 import requests
 import smtplib
+import re
+from bs4 import BeautifulSoup
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
@@ -9,13 +11,14 @@ from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 
 def is_similar(a, b):
-    # 제목의 앞부분 30자 정도를 비교하여 유사도를 측정합니다.
-    return SequenceMatcher(None, a[:30], b[:30]).ratio()
+    # 제목/본문 유사도를 측정 (0.5 이상이면 중복으로 간주)
+    return SequenceMatcher(None, a, b).ratio()
 
-def get_naver_news_data(keyword, score, seen_titles, client_id, client_secret):
+def get_naver_news_data(keyword, score, seen_texts, client_id, client_secret):
     url = f"https://openapi.naver.com/v1/search/news.json?query={keyword}&display=20&sort=date"
     headers = {"X-Naver-Client-Id": client_id, "X-Naver-Client-Secret": client_secret}
     
+    # 제외 키워드 리스트
     exclude_terms = [
         '배구', '스포츠', 'V리그', '배구단', '감독', '블랑', '챔프전', '우승', '경기', '득점', '승리', '리그', 'MVP', '한선수', '선수',
         '시상식', '한국배구연맹', '연예', '방송', '드라마', '영화', '출연', '배우', '가수', '아이돌', '하정우', '공연', '티켓', '예매', '슬리피',
@@ -26,7 +29,7 @@ def get_naver_news_data(keyword, score, seen_titles, client_id, client_secret):
     
     news_items = []
     try:
-        res = requests.get(url, headers=headers)
+        res = requests.get(url, headers=headers, timeout=10)
         res.raise_for_status()
         data = res.json()
         
@@ -36,20 +39,22 @@ def get_naver_news_data(keyword, score, seen_titles, client_id, client_secret):
         for item in data.get('items', []):
             title = item['title'].replace("<b>", "").replace("</b>", "").replace("&quot;", '"').replace("&amp;", "&")
             desc = item['description'].replace("<b>", "").replace("</b>", "").replace("&quot;", '"').replace("&amp;", "&")
-            pub_date = datetime.strptime(item['pubDate'], '%a, %d %b %Y %H:%M:%S +0    900').replace(tzinfo=kst)
             
-            # 1. 날짜 필터링
+            # 1. 날짜 파싱 및 필터링 (공백 주의)
+            try:
+                pub_date = datetime.strptime(item['pubDate'], '%a, %d %b %Y %H:%M:%S +0900').replace(tzinfo=kst)
+            except:
+                continue # 날짜 형식이 안 맞으면 건너뜀
+
             if pub_date < one_day_ago: continue
             
             # 2. 제외 키워드 필터링
             full_text = title + " " + desc
             if any(term in full_text for term in exclude_terms): continue
             
-            # 3. [핵심 수정] 내용 기반 유사도 분석
-            # 제목과 본문의 앞부분(예: 100자)을 합쳐서 비교합니다.
+            # 3. 중복/유사도 필터링 (앞 100자 기준)
             current_content = (title + " " + desc)[:100]
             
-            # 기존에 수집된 뉴스들과 비교하여 50% 이상 유사하면 중복으로 간주
             if any(is_similar(current_content, s) > 0.5 for s in seen_texts):
                 continue
             
@@ -61,13 +66,19 @@ def get_naver_news_data(keyword, score, seen_titles, client_id, client_secret):
             })
             
         return news_items
-    except:
+    except Exception as e:
+        print(f"네이버 API 호출 오류 ({keyword}): {e}")
         return []
 
 def send_audit_report(html_content, image_path):
     send_email_addr = "hcsaudit.news@gmail.com"
     app_pw = os.getenv('EMAIL_PW')
     target_emails = os.getenv('TARGET_EMAILS')
+    
+    if not app_pw or not target_emails:
+        print("메일 환경변수가 설정되지 않았습니다.")
+        return
+
     kst = timezone(timedelta(hours=9))
     now_kst = datetime.now(kst)
     date_str = now_kst.strftime('%Y-%m-%d')
@@ -77,7 +88,6 @@ def send_audit_report(html_content, image_path):
     msg['From'] = formataddr(("현대캐피탈 감사실", send_email_addr))
     msg['To'] = target_emails
 
-    # HTML 수정: 이미지 주변의 검정 배경(#000)과 패딩을 제거했습니다.
     full_html = f"""
     <html><body style="font-family: 'Malgun Gothic', sans-serif;">
         <div style="max-width: 650px; margin: 0 auto; border: 1px solid #eee; padding: 25px;">
@@ -96,17 +106,22 @@ def send_audit_report(html_content, image_path):
         with open(image_path, 'rb') as f:
             msg_img = MIMEImage(f.read())
             msg_img.add_header('Content-ID', '<header_logo>')
-            # 이미지 자체에 테두리가 생기지 않도록 설정
             msg_img.add_header('Content-Disposition', 'inline', filename=os.path.basename(image_path))
             msg.attach(msg_img)
             
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(send_email_addr, app_pw)
-        server.send_message(msg)
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(send_email_addr, app_pw)
+            recipients = [addr.strip() for addr in target_emails.split(',')]
+            server.sendmail(send_email_addr, recipients, msg.as_string())
+            print(f"✅ 리포트 발송 성공!")
+    except Exception as e:
+        print(f"❌ 발송 실패: {e}")
 
 if __name__ == "__main__":
     NAVER_ID = os.getenv('NAVER_ID')
     NAVER_SECRET = os.getenv('NAVER_SECRET')
+    
     base_path = os.path.dirname(os.path.abspath(__file__))
     image_file = os.path.join(base_path, "hcs.png")
 
@@ -122,17 +137,20 @@ if __name__ == "__main__":
         }
     }
 
-    titles_tracker = []
+    # 전체 키워드 통틀어 중복을 체크하기 위한 리스트
+    global_seen_texts = []
     final_html_body = ""
 
     for category_name, keywords_dict in audit_categories.items():
         category_all_news = []
         for kw, score in keywords_dict.items():
-            # 유사도 분석을 위해 titles_tracker를 계속 전달합니다.
-            category_all_news.extend(get_naver_news_data(kw, score, titles_tracker, NAVER_ID, NAVER_SECRET))
+            # global_seen_texts를 전달하여 키워드 간 중복도 방지
+            category_all_news.extend(get_naver_news_data(kw, score, global_seen_texts, NAVER_ID, NAVER_SECRET))
         
         if category_all_news:
+            # 점수 높은 순으로 정렬
             category_all_news.sort(key=lambda x: x['score'], reverse=True)
+            # 상위 5개 추출
             top_5_news = category_all_news[:5]
             
             combined_items = ""
@@ -153,4 +171,5 @@ if __name__ == "__main__":
 
     if final_html_body:
         send_audit_report(final_html_body, image_file)
-        print("중복 제거 및 테두리 수정 완료!")
+    else:
+        print("수집된 뉴스가 없습니다.")
