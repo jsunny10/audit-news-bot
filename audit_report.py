@@ -52,8 +52,8 @@ def get_naver_news_data(keyword, score, seen_texts, client_id, client_secret):
             full_text = title + " " + desc
             if any(term in full_text for term in exclude_terms): continue
             
-            # 3. 중복/유사도 필터링 (앞 100자 기준)
-            current_content = (title + " " + desc)[:100]
+            # 3. 중복/유사도 필터링 (앞 200자 기준)
+            current_content = (title + " " + desc)[:200]
             
             if any(is_similar(current_content, s) > 0.5 for s in seen_texts):
                 continue
