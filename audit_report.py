@@ -54,7 +54,7 @@ def get_naver_news_data(keyword, score, seen_texts, client_id, client_secret):
             # 3. 중복/유사도 필터링 (앞 200자 기준)
             current_content = (title + " " + desc)[:200]
             
-            if any(is_similar(current_content, s) > 0.3 for s in seen_texts):
+            if any(is_similar(current_content, s) > 0.7 for s in seen_texts):
                 continue
             
             seen_texts.append(current_content)
