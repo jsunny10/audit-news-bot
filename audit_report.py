@@ -55,7 +55,7 @@ def get_naver_news_data(keyword, score, seen_texts, client_id, client_secret):
             # current_content = (title + " " + desc)[:200]
             current_content = (title)[:200]
             
-            if any(is_similar(current_content, s) > 0.5 for s in seen_texts):
+            if any(is_similar(current_content, s) > 0.3 for s in seen_texts):
                 continue
             
             seen_texts.append(current_content)
