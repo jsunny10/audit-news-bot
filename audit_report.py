@@ -85,7 +85,14 @@ def send_audit_report(html_content, image_path):
     msg = MIMEMultipart('related')
     msg['Subject'] = f"[{date_str}] Audit News Report ⭐"
     msg['From'] = formataddr(("현대캐피탈 감사실", send_email_addr))
-    msg['To'] = target_emails
+    # msg['To'] = target_emails
+    # ✅ 수정 포인트 1: 수신자(To)에는 발신자 주소나 대표 명칭만 표시
+    # 이렇게 하면 받는 사람 입장에서 '나에게만 온 것'처럼 보이거나 대표 주소만 보입니다.
+    msg['To'] = formataddr(("현대캐피탈 감사실", send_email_addr))
+    # msg['To'] = send_email_addr 
+
+    # 실제 수신자 리스트 생성
+    recipient_list = [addr.strip() for addr in target_emails.split(',')]
 
     full_html = f"""
     <html><body style="font-family: 'Malgun Gothic', sans-serif;">
@@ -107,15 +114,26 @@ def send_audit_report(html_content, image_path):
             msg_img.add_header('Content-ID', '<header_logo>')
             msg_img.add_header('Content-Disposition', 'inline', filename=os.path.basename(image_path))
             msg.attach(msg_img)
-            
+
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(send_email_addr, app_pw)
-            recipients = [addr.strip() for addr in target_emails.split(',')]
-            server.sendmail(send_email_addr, recipients, msg.as_string())
-            print(f"✅ 리포트 발송 성공!")
+            
+            # ✅ 수정 포인트 2: 실제 발송은 recipient_list(모든 수신자)에게 보냄
+            # msg['To']에는 대표 주소만 적혀 있지만, 실제 배달은 모든 수신자에게 갑니다.
+            server.sendmail(send_email_addr, recipient_list, msg.as_string())
+            print(f"✅ 리포트 숨은참조 발송 성공!")
     except Exception as e:
         print(f"❌ 발송 실패: {e}")
+        
+ #   try:
+ #       with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+ #           server.login(send_email_addr, app_pw)
+ #           recipients = [addr.strip() for addr in target_emails.split(',')]
+ #           server.sendmail(send_email_addr, recipients, msg.as_string())
+ #           print(f"✅ 리포트 발송 성공!")
+ #   except Exception as e:
+ #       print(f"❌ 발송 실패: {e}")
 
 if __name__ == "__main__":
     NAVER_ID = os.getenv('NAVER_ID')
