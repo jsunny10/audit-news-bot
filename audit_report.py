@@ -74,7 +74,7 @@ def get_naver_news_data(keyword, score, seen_texts, client_id, client_secret, da
             except:
                 continue # 날짜 형식이 안 맞으면 건너뜀
             if pub_date < search_limit: 
-            continue
+                continue
             
             # if pub_date < one_day_ago: continue
             
