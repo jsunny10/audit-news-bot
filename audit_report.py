@@ -197,12 +197,12 @@ if __name__ == "__main__":
     # 전체 키워드 통틀어 중복을 체크하기 위한 리스트
     global_seen_texts = []
     final_html_body = ""
-
+    
     for category_name, keywords_dict in audit_categories.items():
         category_all_news = []
         for kw, score in keywords_dict.items():
             # global_seen_texts를 전달하여 키워드 간 중복도 방지
-            category_all_news.extend(get_naver_news_data(kw, score, global_seen_texts, NAVER_ID, NAVER_SECRET))
+            category_all_news.extend(get_naver_news_data(kw, score, global_seen_texts, NAVER_ID, NAVER_SECRET, days_to_fetch))
         
         if category_all_news:
             # 점수 높은 순으로 정렬
