@@ -2,6 +2,7 @@ import os
 import requests
 import smtplib
 import re
+import holidays
 from bs4 import BeautifulSoup
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -10,11 +11,35 @@ from email.utils import formataddr
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 
+# --- 1. 휴일 체크 및 수집 범위(일수) 계산 함수 ---
+def get_fetch_days():
+    kst = timezone(timedelta(hours=9))
+    today = datetime.now(kst).date()
+    
+    kr_holidays = holidays.KR()
+    labor_day = datetime(today.year, 5, 1).date() # 근로자의 날(은행 휴무)
+    
+    def check_is_holiday(dt):
+        return dt.weekday() >= 5 or dt in kr_holidays or dt == labor_day
+
+    # 오늘이 휴일이면 None 반환 (배치 중단용)
+    if check_is_holiday(today):
+        return None
+
+    # 평일인 경우, 직전 평일 이후로 며칠이 지났는지 계산
+    fetch_days = 1
+    check_date = today - timedelta(days=1)
+    while check_is_holiday(check_date):
+        fetch_days += 1
+        check_date -= timedelta(days=1)
+            
+    return fetch_days
+
 def is_similar(a, b):
     # 제목/본문 유사도를 측정 (0.5 이상이면 중복으로 간주)
     return SequenceMatcher(None, a, b).ratio()
 
-def get_naver_news_data(keyword, score, seen_texts, client_id, client_secret):
+def get_naver_news_data(keyword, score, seen_texts, client_id, client_secret, days_to_fetch):
     url = f"https://openapi.naver.com/v1/search/news.json?query={keyword}&display=20&sort=date"
     headers = {"X-Naver-Client-Id": client_id, "X-Naver-Client-Secret": client_secret}
     
@@ -33,7 +58,11 @@ def get_naver_news_data(keyword, score, seen_texts, client_id, client_secret):
         data = res.json()
         
         kst = timezone(timedelta(hours=9))
-        one_day_ago = datetime.now(kst) - timedelta(days=1)
+        # ✅ 메인에서 계산된 days_to_fetch를 사용하여 검색 제한 시간 설정
+        search_limit = datetime.now(kst) - timedelta(days=days_to_fetch)
+    
+        # kst = timezone(timedelta(hours=9))
+        # one_day_ago = datetime.now(kst) - timedelta(days=1)
         
         for item in data.get('items', []):
             title = item['title'].replace("<b>", "").replace("</b>", "").replace("&quot;", '"').replace("&amp;", "&")
@@ -44,8 +73,10 @@ def get_naver_news_data(keyword, score, seen_texts, client_id, client_secret):
                 pub_date = datetime.strptime(item['pubDate'], '%a, %d %b %Y %H:%M:%S +0900').replace(tzinfo=kst)
             except:
                 continue # 날짜 형식이 안 맞으면 건너뜀
-
-            if pub_date < one_day_ago: continue
+            if pub_date < search_limit: 
+            continue
+            
+            # if pub_date < one_day_ago: continue
             
             # 2. 제외 키워드 필터링
             full_text = title + " " + desc
@@ -54,7 +85,6 @@ def get_naver_news_data(keyword, score, seen_texts, client_id, client_secret):
             # 3. 중복/유사도 필터링 (앞 200자 기준)
             # current_content = (title + " " + desc)[:200]
             current_content = (title)[:200]
-            
             if any(is_similar(current_content, s) > 0.3 for s in seen_texts):
                 continue
             
@@ -137,6 +167,15 @@ def send_audit_report(html_content, image_path):
  #       print(f"❌ 발송 실패: {e}")
 
 if __name__ == "__main__":
+    # ✅ 1. 휴일 체크 및 수집 기간 계산
+    days_to_fetch = get_fetch_days()
+    
+    if days_to_fetch is None:
+        print("🚩 오늘은 한국 공휴일 또는 주말입니다. 배치를 종료합니다.")
+        exit() # 휴일에는 프로세스 즉시 종료
+
+    print(f"🔍 최근 {days_to_fetch}일치 데이터를 수집합니다.")
+    
     NAVER_ID = os.getenv('NAVER_ID')
     NAVER_SECRET = os.getenv('NAVER_SECRET')
     
