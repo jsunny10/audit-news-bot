@@ -14,7 +14,8 @@ from difflib import SequenceMatcher
 # --- 1. 휴일 체크 및 수집 범위(일수) 계산 함수 ---
 def get_fetch_days():
     kst = timezone(timedelta(hours=9))
-    today = datetime.now(kst).date()
+    # today = datetime.now(kst).date()
+    today = datetime(2026, 5, 4).date()
     
     kr_holidays = holidays.KR()
     labor_day = datetime(today.year, 5, 1).date() # 근로자의 날(은행 휴무)
@@ -228,5 +229,6 @@ if __name__ == "__main__":
 
     if final_html_body:
         send_audit_report(final_html_body, image_file)
+        print(fetch_days)
     else:
         print("수집된 뉴스가 없습니다.")
