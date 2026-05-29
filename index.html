@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>현대캐피탈 감사실 - Audit News 아카이브</title>
+    <title> HCS Audit News 아카이브</title>
     <style>
         body {
             margin: 0;
@@ -36,7 +36,7 @@
         /* 왼쪽 달력 섹션 */
         .sidebar {
             flex: 1;
-            min-width: 280px;
+            min-width: 200px;
             background: white;
             padding: 20px;
             border-radius: 8px;
@@ -69,7 +69,7 @@
         }
         .content h2 {
             margin-top: 0;
-            font-size: 18pt;
+            font-size: 15pt;
             color: #0f172a;
             border-bottom: 1px solid #e2e8f0;
             padding-bottom: 15px;
@@ -156,7 +156,7 @@
             const titleZone = document.getElementById('viewDateTitle');
             const container = document.getElementById('newsContainer');
             
-            titleZone.innerText = `📅 ${dateStr} 감사 뉴스 리포트`;
+            titleZone.innerText = `📅 ${dateStr} News Report`;
             container.innerHTML = '<p class="no-data">데이터를 불러오는 중입니다...</p>';
 
             // data/YYYY-MM-DD.json 파일을 비동기로 호출
