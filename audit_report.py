@@ -225,12 +225,15 @@ if __name__ == "__main__":
             # score 0 제외 후 높은 순 정렬, 최대 20개
             category_all_news.sort(key=lambda x: x['score'], reverse=True)
             top_5_news = [news for news in category_all_news if news['score'] > 0][:20]
+
             
             combined_items = ""
             for news in top_5_news:
+                matched_str = ", ".join(news.get('matched_keywords', []))
                 combined_items += f"""
                 <li style='margin-bottom: 12px;'>
                     <span style='font-size: 10pt; color: #888; margin-right: 6px;'>score : {news['score']}</span>
+                    <span style='font-size: 9pt; color: #e07000; margin-right: 6px;'>[{matched_str}]</span>
                     <a href='{news['link']}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {news['title']}</a>
                 </li>"""
                        
