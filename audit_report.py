@@ -230,8 +230,8 @@ if __name__ == "__main__":
 
                 # ✅ 조건부 키워드는 다른 키워드가 1개 이상 함께 있어야만 반영
                 if kw in conditional_keywords:
-                    if not (found_keywords - {kw}):
-                        continue  # 단독 등장이면 score 미반영
+                    if not (found_keywords - conditional_keywords):
+                        continue  # 조건부 키워드끼리만 있으면 score 미반영
 
                 seen_kw_scores[kw] = kw_score
                 total_score += kw_score
