@@ -1,9 +1,9 @@
 import os
 import requests
 import smtplib
-import re
+# import re
 import holidays
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
@@ -225,8 +225,8 @@ if __name__ == "__main__":
             # score 0 제외 후 높은 순 정렬, 최대 20개
             category_all_news.sort(key=lambda x: x['score'], reverse=True)
             top_5_news = [news for news in category_all_news if news['score'] > 0][:20]
-
             
+            if top_5_news:  # ✅ 추가 - 실제 뉴스가 있을 때만 HTML 생성
             combined_items = ""
             for news in top_5_news:
                 matched_str = ", ".join(news.get('matched_keywords', []))
