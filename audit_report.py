@@ -198,59 +198,72 @@ if __name__ == "__main__":
     }
 
     # 전체 키워드 통틀어 중복을 체크하기 위한 리스트
+    # 전체 키워드 통틀어 중복을 체크하기 위한 리스트
     global_seen_texts = []
     final_html_body = ""
-    
+
+    # ✅ 전체 카테고리 키워드 목록 (조건부 키워드 동반 체크용)
+    all_keywords = set()
+    for kd in audit_categories.values():
+        all_keywords.update(kd.keys())
+
+    # ✅ 단독 등장 시 score 미반영 키워드
+    conditional_keywords = {"과징금", "과태료"}
+
     for category_name, keywords_dict in audit_categories.items():
         category_all_news = []
         for kw, score in keywords_dict.items():
             category_all_news.extend(get_naver_news_data(kw, global_seen_texts, NAVER_ID, NAVER_SECRET, days_to_fetch))
-        
-        # ✅ 수집 후, 각 기사 제목 안에 포함된 키워드의 score 합산
+
         for news in category_all_news:
             total_score = 0
             matched_keywords = []
-            # 제목 + 본문 200자 합쳐서 체크 범위 설정
             check_text = (news['title'] + " " + news.get('desc', ''))[:200]
-            seen_kw_scores = {}  # 중복 키워드 방지: 같은 키워드는 최초 1회만 계산
+            seen_kw_scores = {}
+
+            # 현재 check_text에 포함된 전체 키워드 목록 먼저 파악
+            found_keywords = {kw for kw in all_keywords if kw in check_text}
+
             for kw, kw_score in keywords_dict.items():
-                if kw in check_text and kw not in seen_kw_scores:
-                    seen_kw_scores[kw] = kw_score
-                    total_score += kw_score
-                    matched_keywords.append(f"{kw}({kw_score})")
+                if kw not in check_text or kw in seen_kw_scores:
+                    continue
+
+                # ✅ 조건부 키워드는 다른 키워드가 1개 이상 함께 있어야만 반영
+                if kw in conditional_keywords:
+                    if not (found_keywords - {kw}):
+                        continue  # 단독 등장이면 score 미반영
+
+                seen_kw_scores[kw] = kw_score
+                total_score += kw_score
+                matched_keywords.append(f"{kw}({kw_score})")
+
             news['score'] = total_score
             news['matched_keywords'] = matched_keywords
 
         if category_all_news:
-            # score 0 제외 후 높은 순 정렬, 최대 20개
             category_all_news.sort(key=lambda x: x['score'], reverse=True)
             top_5_news = [news for news in category_all_news if news['score'] > 0][:20]
-            
-            if top_5_news:  # ✅ 추가 - 실제 뉴스가 있을 때만 HTML 생성
-            combined_items = ""
-            for news in top_5_news:
-                matched_str = ", ".join(news.get('matched_keywords', []))
-                combined_items += f"""
-                <li style='margin-bottom: 12px;'>
-                    <span style='font-size: 10pt; color: #888; margin-right: 6px;'>score : {news['score']}</span>
-                    <span style='font-size: 9pt; color: #e07000; margin-right: 6px;'>[{matched_str}]</span>
-                    <a href='{news['link']}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {news['title']}</a>
-                </li>"""
-                       
-            final_html_body += f"""
-            <div style="margin-top: 30px; margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
-                <h2 style="color: #2c3e50; font-size: 14pt; border-bottom: 2px solid #2c3e50; padding-bottom: 5px; margin-top: 0;">{category_name}</h2>
-                <ul style="list-style-type: none; padding-left: 0; margin-top: 15px;">
-                    {combined_items}
-                </ul>
-            </div>
-            """
 
+            if top_5_news:  # ✅ 뉴스 있을 때만 HTML 생성
+                combined_items = ""
+                for news in top_5_news:
+                    matched_str = ", ".join(news.get('matched_keywords', []))
+                    combined_items += f"""
+                    <li style='margin-bottom: 12px;'>
+                        <span style='font-size: 10pt; color: #888; margin-right: 6px;'>score : {news['score']}</span>
+                        <span style='font-size: 9pt; color: #e07000; margin-right: 6px;'>[{matched_str}]</span>
+                        <a href='{news['link']}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {news['title']}</a>
+                    </li>"""
 
-    if final_html_body:
-        send_audit_report(final_html_body, image_file)
-    else:
-        print("수집된 뉴스가 없습니다.")
+                final_html_body += f"""
+                <div style="margin-top: 30px; margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
+                    <h2 style="color: #2c3e50; font-size: 14pt; border-bottom: 2px solid #2c3e50; padding-bottom: 5px; margin-top: 0;">{category_name}</h2>
+                    <ul style="list-style-type: none; padding-left: 0; margin-top: 15px;">
+                        {combined_items}
+                    </ul>
+                </div>
+                """
+
     if final_html_body:
         send_audit_report(final_html_body, image_file)
     else:
