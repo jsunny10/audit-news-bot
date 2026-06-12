@@ -3,6 +3,7 @@ import requests
 import smtplib
 import re
 import holidays
+import anthropic
 from bs4 import BeautifulSoup
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -42,6 +43,7 @@ def is_similar(a, b):
 def get_naver_news_data(keyword, seen_texts, client_id, client_secret, days_to_fetch):
     url = f"https://openapi.naver.com/v1/search/news.json?query={keyword}&display=20&sort=date"
     headers = {"X-Naver-Client-Id": client_id, "X-Naver-Client-Secret": client_secret}
+
     
     exclude_terms = [
         '배구', '스포츠', 'V리그', '배구단', '감독', '블랑', '챔프전', '우승', '경기', '득점', '승리', '리그', 'MVP', '한선수', '선수', '허수봉', '남자부',
@@ -90,7 +92,56 @@ def get_naver_news_data(keyword, seen_texts, client_id, client_secret, days_to_f
     except Exception as e:
         print(f"네이버 API 호출 오류 ({keyword}): {e}")
         return []
+def filter_news_by_ai(news_items, category_desc):
+    """Claude AI가 뉴스 관련성을 판단해서 필터링"""
+    if not news_items:
+        return []
 
+    client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+
+    # 제목 목록을 번호와 함께 텍스트로 구성
+    news_list_text = "\n".join([
+        f"{i+1}. {news['title']} / {news.get('desc', '')[:100]}"
+        for i, news in enumerate(news_items)
+    ])
+
+    prompt = f"""아래는 네이버 뉴스 검색 결과입니다.
+당신은 '{category_desc}' 업무 담당자입니다.
+각 뉴스가 해당 업무와 관련이 있는지 판단해주세요.
+
+관련 있음 기준:
+- 현대캐피탈의 감사, 내부통제, 소비자보호, 민원, 불완전판매, 금융사고, 제재, 검사 관련
+- 금융권 전반의 소비자보호, 내부통제, 컴플라이언스 이슈
+- 금융당국의 소비자보호, 내부통제 관련 규제/제도 변화
+
+관련 없음 기준:
+- 단순 금리/상품 홍보, 스포츠, 연예, 일반 사회 뉴스
+- 현대캐피탈과 무관한 타업종 뉴스
+
+뉴스 목록:
+{news_list_text}
+
+응답 형식: 관련 있는 뉴스 번호만 쉼표로 구분해서 답하세요. 예) 1,3,5
+관련 있는 뉴스가 없으면 "없음" 이라고만 답하세요."""
+
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=200,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        result_text = response.content[0].text.strip()
+
+        if result_text == "없음":
+            return []
+
+        # 반환된 번호로 해당 뉴스 추출
+        selected_indices = [int(n.strip()) - 1 for n in result_text.split(',') if n.strip().isdigit()]
+        return [news_items[i] for i in selected_indices if 0 <= i < len(news_items)]
+
+    except Exception as e:
+        print(f"AI 필터링 오류: {e}")
+        return []
 
 def send_audit_report(html_content, image_path):
     send_email_addr = "hcsaudit.news@gmail.com"
@@ -245,7 +296,53 @@ if __name__ == "__main__":
                 </ul>
             </div>
             """
+# ✅ 기존 카테고리 루프 (유지)
+    for category_name, keywords_dict in audit_categories.items():
+        # ... 기존 코드 그대로 ...
 
+    # ✅ 새 카테고리: AI 필터링 기반 현대캐피탈 감사/소비자보호 뉴스
+    ai_category_keywords = {
+        "현대캐피탈": 5,
+        "소비자보호": 3,
+        "민원": 2,
+        "불완전판매": 3,
+        "내부통제": 3,
+        "컴플라이언스": 2,
+        "금융사고": 2,
+    }
+
+    ai_raw_news = []
+    ai_seen_texts = []  # AI 카테고리 전용 중복 체크 (global과 별도)
+    for kw in ai_category_keywords.keys():
+        ai_raw_news.extend(get_naver_news_data(kw, global_seen_texts, NAVER_ID, NAVER_SECRET, days_to_fetch))
+
+    # AI가 관련성 판단
+    ai_filtered_news = filter_news_by_ai(ai_raw_news, "현대캐피탈 감사 및 통제부서, 소비자보호")
+
+    if ai_filtered_news:
+        ai_combined_items = ""
+        for news in ai_filtered_news[:20]:
+            ai_combined_items += f"""
+            <li style='margin-bottom: 12px;'>
+                <span style='font-size: 9pt; color: #27ae60; margin-right: 6px;'>[AI 선별]</span>
+                <a href='{news['link']}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {news['title']}</a>
+            </li>"""
+
+        final_html_body += f"""
+        <div style="margin-top: 30px; margin-bottom: 20px; padding: 15px; background-color: #f0fff4; border-radius: 8px;">
+            <h2 style="color: #27ae60; font-size: 14pt; border-bottom: 2px solid #27ae60; padding-bottom: 5px; margin-top: 0;">
+                🤖 현대캐피탈 감사·소비자보호 (AI 선별)
+            </h2>
+            <ul style="list-style-type: none; padding-left: 0; margin-top: 15px;">
+                {ai_combined_items}
+            </ul>
+        </div>
+        """
+
+    if final_html_body:
+        send_audit_report(final_html_body, image_file)
+    else:
+        print("수집된 뉴스가 없습니다.")
     if final_html_body:
         send_audit_report(final_html_body, image_file)
     else:
