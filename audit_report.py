@@ -38,12 +38,11 @@ def get_fetch_days():
 def is_similar(a, b):
     # 제목/본문 유사도를 측정 (0.5 이상이면 중복으로 간주)
     return SequenceMatcher(None, a, b).ratio()
-
-def get_naver_news_data(keyword, score, seen_texts, client_id, client_secret, days_to_fetch):
+    
+def get_naver_news_data(keyword, seen_texts, client_id, client_secret, days_to_fetch):
     url = f"https://openapi.naver.com/v1/search/news.json?query={keyword}&display=20&sort=date"
     headers = {"X-Naver-Client-Id": client_id, "X-Naver-Client-Secret": client_secret}
     
-    # 제외 키워드 리스트
     exclude_terms = [
         '배구', '스포츠', 'V리그', '배구단', '감독', '블랑', '챔프전', '우승', '경기', '득점', '승리', '리그', 'MVP', '한선수', '선수', '허수봉', '남자부',
         '시상식', '한국배구연맹', '연예', '방송', '드라마', '영화', '출연', '배우', '가수', '아이돌', '하정우', '공연', '티켓', '예매', '슬리피',
@@ -58,47 +57,39 @@ def get_naver_news_data(keyword, score, seen_texts, client_id, client_secret, da
         data = res.json()
         
         kst = timezone(timedelta(hours=9))
-        # ✅ 메인에서 계산된 days_to_fetch를 사용하여 검색 제한 시간 설정
         search_limit = datetime.now(kst) - timedelta(days=days_to_fetch)
     
-        # kst = timezone(timedelta(hours=9))
-        # one_day_ago = datetime.now(kst) - timedelta(days=1)
-        
         for item in data.get('items', []):
             title = item['title'].replace("<b>", "").replace("</b>", "").replace("&quot;", '"').replace("&amp;", "&")
             desc = item['description'].replace("<b>", "").replace("</b>", "").replace("&quot;", '"').replace("&amp;", "&")
             
-            # 1. 날짜 파싱 및 필터링 (공백 주의)
             try:
                 pub_date = datetime.strptime(item['pubDate'], '%a, %d %b %Y %H:%M:%S +0900').replace(tzinfo=kst)
             except:
-                continue # 날짜 형식이 안 맞으면 건너뜀
+                continue
             if pub_date < search_limit: 
                 continue
             
-            # if pub_date < one_day_ago: continue
-            
-            # 2. 제외 키워드 필터링
             full_text = title + " " + desc
             if any(term in full_text for term in exclude_terms): continue
             
-            # 3. 중복/유사도 필터링 (앞 200자 기준)
-            # current_content = (title + " " + desc)[:200]
             current_content = (title)[:200]
             if any(is_similar(current_content, s) > 0.3 for s in seen_texts):
                 continue
             
             seen_texts.append(current_content)
+            # ✅ score는 0으로 초기화, 나중에 메인 루프에서 제목 기준으로 합산
             news_items.append({
                 "title": title,
                 "link": item['link'],
-                "score": score
+                "score": 0
             })
             
         return news_items
     except Exception as e:
         print(f"네이버 API 호출 오류 ({keyword}): {e}")
         return []
+
 
 def send_audit_report(html_content, image_path):
     send_email_addr = "hcsaudit.news@gmail.com"
@@ -184,14 +175,24 @@ if __name__ == "__main__":
 
     audit_categories = {
         "🏛️ 금감원 및 감독기구": {
-            "금융감독원": 5, "금융감독원 검사": 4, "금감원 검사": 4, "금융감독원 제재": 3, "금감원 제재": 3, "금감원 횡령" : 1,
-            "금감원 규제" : 2, "개인정보위" : 2,  "개보위" : 2, "규제완화" : 2, "규제강화" : 2
+            "금융감독원": 5, "금감원":5, "금융감독원 검사": 5, "금감원 검사": 5, "금융위원회" : 5, 
+            "금융감독원 제재": 4, "금감원 제재": 4, 
+            "금융위" : 3, "금감원 규제" : 3, "금융당국" : 3, 
+            "개인정보위" : 2,  "개보위" : 2, "규제완화" : 2, "규제강화" : 2, "건전성" : 2, "금융위원장" : 2, "금감원장" : 2, "금감원 긴급" : 2
+            "금감원 횡령" : 1,
         },
         "🏢 자사 및 업계 동향": {
-            "현대캐피탈": 5, "캐피탈사 사고": 4, "캐피탈사 사기": 3,  "리스/할부": 1, "금융권" : 2
+            "현대캐피탈": 5, 
+            "캐피탈사 사고": 4, 
+            "캐피탈사 사기": 3,  "캐피탈업계" : 3, 
+            "금융권" : 2, "여전업권" : 2, "여전업계" : 2, 
+            "리스/할부": 1,  "여신금융협회" : 1
         },
         "⚠️ 내부통제 및 리스크": {
-            "금융권 내부통제": 5, "금융사고": 3, "보안사고": 3, "유출사고": 3, "과징금": 2, "과태료": 2, "의무위반": 2, "개인정보보호": 1
+            "금융권 내부통제": 5, 
+            "금융사고": 3, "보안사고": 3, "유출사고": 3, 
+            "과징금": 2, "과태료": 2, "의무위반": 2, 
+            "개인정보보호": 1
         }
     }
 
@@ -202,13 +203,22 @@ if __name__ == "__main__":
     for category_name, keywords_dict in audit_categories.items():
         category_all_news = []
         for kw, score in keywords_dict.items():
-            # global_seen_texts를 전달하여 키워드 간 중복도 방지
-            category_all_news.extend(get_naver_news_data(kw, score, global_seen_texts, NAVER_ID, NAVER_SECRET, days_to_fetch))
+            category_all_news.extend(get_naver_news_data(kw, global_seen_texts, NAVER_ID, NAVER_SECRET, days_to_fetch))
+        
+        # ✅ 수집 후, 각 기사 제목 안에 포함된 키워드의 score 합산
+        for news in category_all_news:
+            total_score = 0
+            matched_keywords = []
+            for kw, kw_score in keywords_dict.items():
+                if kw in news['title']:
+                    total_score += kw_score
+                    matched_keywords.append(f"{kw}({kw_score})")
+            news['score'] = total_score
+            news['matched_keywords'] = matched_keywords  # 디버깅/표시용 (선택)
         
         if category_all_news:
-            # 점수 높은 순으로 정렬
+            # 점수 높은 순 정렬 후 상위 20개
             category_all_news.sort(key=lambda x: x['score'], reverse=True)
-            # 상위 5개 추출
             top_5_news = category_all_news[:20]
             
             combined_items = ""
@@ -218,15 +228,6 @@ if __name__ == "__main__":
                     <span style='font-size: 10pt; color: #888; margin-right: 6px;'>score : {news['score']}</span>
                     <a href='{news['link']}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {news['title']}</a>
                 </li>"""
-
-            final_html_body += f"""
-            <div style="margin-top: 30px; margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
-                <h2 style="color: #2c3e50; font-size: 14pt; border-bottom: 2px solid #2c3e50; padding-bottom: 5px; margin-top: 0;">{category_name}</h2>
-                <ul style="list-style-type: none; padding-left: 0; margin-top: 15px;">
-                    {combined_items}
-                </ul>
-            </div>
-            """
 
     if final_html_body:
         send_audit_report(final_html_body, image_file)
