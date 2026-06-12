@@ -186,7 +186,7 @@ if __name__ == "__main__":
             "현대캐피탈": 5, 
             "캐피탈사 사고": 4, 
             "캐피탈사 사기": 3,  "캐피탈업계" : 3, 
-            "금융권" : 2, "여전업권" : 2, "여전업계" : 2, 
+            "금융권" : 2, "여전업권" : 2, "여전업계" : 2, "여신전문금융" : 2,
             "리스/할부": 1,  "여신금융협회" : 1
         },
         "⚠️ 내부통제 및 리스크": {
@@ -198,7 +198,6 @@ if __name__ == "__main__":
     }
 
     # 전체 키워드 통틀어 중복을 체크하기 위한 리스트
-    # 전체 키워드 통틀어 중복을 체크하기 위한 리스트
     global_seen_texts = []
     final_html_body = ""
 
@@ -208,7 +207,7 @@ if __name__ == "__main__":
         all_keywords.update(kd.keys())
 
     # ✅ 단독 등장 시 score 미반영 키워드
-    conditional_keywords = {"과징금", "과태료"}
+    conditional_keywords = {"과징금", "과태료","규제완화","규제강화"}
 
     for category_name, keywords_dict in audit_categories.items():
         category_all_news = []
