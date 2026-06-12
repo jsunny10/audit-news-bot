@@ -228,6 +228,15 @@ if __name__ == "__main__":
                     <span style='font-size: 10pt; color: #888; margin-right: 6px;'>score : {news['score']}</span>
                     <a href='{news['link']}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {news['title']}</a>
                 </li>"""
+                       
+            final_html_body += f"""
+            <div style="margin-top: 30px; margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
+                <h2 style="color: #2c3e50; font-size: 14pt; border-bottom: 2px solid #2c3e50; padding-bottom: 5px; margin-top: 0;">{category_name}</h2>
+                <ul style="list-style-type: none; padding-left: 0; margin-top: 15px;">
+                    {combined_items}
+                </ul>
+            </div>
+            """
 
     if final_html_body:
         send_audit_report(final_html_body, image_file)
