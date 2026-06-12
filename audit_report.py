@@ -209,12 +209,13 @@ if __name__ == "__main__":
             # 점수 높은 순으로 정렬
             category_all_news.sort(key=lambda x: x['score'], reverse=True)
             # 상위 5개 추출
-            top_5_news = category_all_news[:5]
+            top_5_news = category_all_news[:20]
             
             combined_items = ""
             for news in top_5_news:
                 combined_items += f"""
                 <li style='margin-bottom: 12px;'>
+                    <span style='font-size: 10pt; color: #888; margin-right: 6px;'>score : {news['score']}</span>
                     <a href='{news['link']}' style='text-decoration: none; color: #1a0dab; font-size: 11pt;'>• {news['title']}</a>
                 </li>"""
 
