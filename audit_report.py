@@ -215,11 +215,11 @@ if __name__ == "__main__":
                     matched_keywords.append(f"{kw}({kw_score})")
             news['score'] = total_score
             news['matched_keywords'] = matched_keywords  # 디버깅/표시용 (선택)
-        
+
         if category_all_news:
-            # 점수 높은 순 정렬 후 상위 20개
+            # score 0 제외 후 높은 순 정렬, 최대 20개
             category_all_news.sort(key=lambda x: x['score'], reverse=True)
-            top_5_news = category_all_news[:20]
+            top_5_news = [news for news in category_all_news if news['score'] > 0][:20]
             
             combined_items = ""
             for news in top_5_news:
