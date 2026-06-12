@@ -81,6 +81,7 @@ def get_naver_news_data(keyword, seen_texts, client_id, client_secret, days_to_f
             # ✅ score는 0으로 초기화, 나중에 메인 루프에서 제목 기준으로 합산
             news_items.append({
                 "title": title,
+                "desc": desc,   # ✅ 본문 추가
                 "link": item['link'],
                 "score": 0
             })
@@ -209,12 +210,16 @@ if __name__ == "__main__":
         for news in category_all_news:
             total_score = 0
             matched_keywords = []
+            # 제목 + 본문 200자 합쳐서 체크 범위 설정
+            check_text = (news['title'] + " " + news.get('desc', ''))[:200]
+            seen_kw_scores = {}  # 중복 키워드 방지: 같은 키워드는 최초 1회만 계산
             for kw, kw_score in keywords_dict.items():
-                if kw in news['title']:
+                if kw in check_text and kw not in seen_kw_scores:
+                    seen_kw_scores[kw] = kw_score
                     total_score += kw_score
                     matched_keywords.append(f"{kw}({kw_score})")
             news['score'] = total_score
-            news['matched_keywords'] = matched_keywords  # 디버깅/표시용 (선택)
+            news['matched_keywords'] = matched_keywords
 
         if category_all_news:
             # score 0 제외 후 높은 순 정렬, 최대 20개
