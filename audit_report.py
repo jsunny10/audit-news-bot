@@ -3,6 +3,7 @@ import requests
 import smtplib
 # import re
 import holidays
+import json
 # from bs4 import BeautifulSoup
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -10,6 +11,7 @@ from email.mime.image import MIMEImage
 from email.utils import formataddr
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
+
 
 # --- 1. 휴일 체크 및 수집 범위(일수) 계산 함수 ---
 def get_fetch_days():
@@ -93,6 +95,32 @@ def get_naver_news_data(keyword, seen_texts, client_id, client_secret, days_to_f
         print(f"네이버 API 호출 오류 ({keyword}): {e}")
         return []
 
+#웹 페이지 구성
+def save_news_json(news_by_category, date_str):
+    os.makedirs('docs/data', exist_ok=True)
+
+    # 날짜별 뉴스 저장
+    with open(f'docs/data/{date_str}.json', 'w', encoding='utf-8') as f:
+        json.dump(news_by_category, f, ensure_ascii=False, indent=2)
+
+    # index.json 업데이트 (전체 날짜 목록)
+    index_path = 'docs/data/index.json'
+    if os.path.exists(index_path):
+        with open(index_path, 'r', encoding='utf-8') as f:
+            index = json.load(f)
+    else:
+        index = []
+
+    if date_str not in index:
+        index.append(date_str)
+        index.sort(reverse=True)
+
+    with open(index_path, 'w', encoding='utf-8') as f:
+        json.dump(index, f, ensure_ascii=False)
+
+    print(f"✅ JSON 저장 완료: docs/data/{date_str}.json")
+
+
 def send_audit_report(html_content, image_path):
     send_email_addr = "hcsaudit.news@gmail.com"
     app_pw = os.getenv('EMAIL_PW')
@@ -163,6 +191,9 @@ if __name__ == "__main__":
     # ✅ 1. 휴일 체크 및 수집 기간 계산
     days_to_fetch = get_fetch_days()
     
+    kst = timezone(timedelta(hours=9))
+    date_str = datetime.now(kst).strftime('%Y-%m-%d')  # ✅ 날짜 변수 추가
+
     if days_to_fetch is None:
         print("🚩 오늘은 한국 공휴일 또는 주말입니다. 배치를 종료합니다.")
         exit() # 휴일에는 프로세스 즉시 종료
@@ -268,3 +299,10 @@ if __name__ == "__main__":
         send_audit_report(final_html_body, image_file)
     else:
         print("수집된 뉴스가 없습니다.")
+
+    if final_html_body:
+        send_audit_report(final_html_body, image_file)
+        save_news_json(collected_news, date_str)        # ✅ JSON 저장 호출
+    else:
+        print("수집된 뉴스가 없습니다.")
+    
