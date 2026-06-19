@@ -26,7 +26,7 @@
           env:
             EMAIL_PW: ${{ secrets.EMAIL_PW }}
             TARGET_EMAILS: ${{ secrets.TARGET_EMAILS }}
-            NAVER_ID: ${{ secrets.NAVER_ID }}
-            NAVER_SECRET: ${{ secrets.NAVER_SECRET }}
+            NAVER_ID: ${{ secrets.NAVER_CLIENT_ID }}
+            NAVER_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           run: |
             python audit_report.py
