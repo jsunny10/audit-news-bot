@@ -17,7 +17,7 @@
             padding: 20px;
         }
         .header-banner {
-            max-width: 1000px;
+            max-width: 1400px;
             margin: 0 auto 20px;
             border-radius: 15px;
             overflow: hidden;
@@ -30,30 +30,40 @@
             display: block;
         }
         .container {
-            max-width: 1000px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
-            padding: 40px;
+            padding: 30px;
             border-radius: 15px;
             border: 4px solid #001f3f;
             box-shadow: 0 4px 15px rgba(0,31,63,0.2);
         }
         h1 {
             color: #001f3f;
-            margin-bottom: 15px;
-            font-size: 32px;
+            margin-bottom: 10px;
+            font-size: 28px;
             text-align: center;
             font-weight: bold;
         }
         .subtitle {
             text-align: center;
             color: #7f8c8d;
-            font-size: 14px;
-            margin-bottom: 30px;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .main-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .calendar-section {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
         }
         .calendar-selector {
-            margin: 30px 0;
-            padding: 25px;
+            padding: 20px;
             background: #f8f9fa;
             border-radius: 12px;
             border: 2px solid #001f3f;
@@ -63,24 +73,24 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .calendar-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #001f3f;
         }
         .calendar-nav {
             display: flex;
-            gap: 10px;
+            gap: 5px;
         }
         .calendar-nav button {
             background: white;
             border: 2px solid #001f3f;
-            padding: 8px 15px;
-            border-radius: 6px;
+            padding: 5px 10px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             color: #001f3f;
             font-weight: bold;
             transition: all 0.3s;
@@ -92,14 +102,14 @@
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
+            gap: 5px;
         }
         .calendar-day-header {
             text-align: center;
             font-weight: bold;
             color: #001f3f;
-            padding: 10px;
-            font-size: 13px;
+            padding: 8px 0;
+            font-size: 11px;
         }
         .calendar-day-header.sunday {
             color: #dc3545;
@@ -113,16 +123,17 @@
             align-items: center;
             justify-content: center;
             background: white;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 14px;
+            font-size: 12px;
             color: #7f8c8d;
             position: relative;
+            border: 1px solid #e0e0e0;
         }
         .calendar-day:hover {
             transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
         .calendar-day.has-data {
             background: #001f3f;
@@ -133,43 +144,78 @@
         .calendar-day.has-data::after {
             content: '•';
             position: absolute;
-            bottom: 3px;
-            font-size: 16px;
+            bottom: 2px;
+            font-size: 14px;
             color: #ffd700;
         }
         .calendar-day.selected {
             background: #ff6b6b;
             color: white;
             font-weight: bold;
-            box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+            box-shadow: 0 4px 12px rgba(255,107,107,0.4);
         }
         .calendar-day.disabled {
             opacity: 0.3;
             cursor: not-allowed;
         }
+        .calendar-day.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        .content-section {
+            min-height: 500px;
+        }
         .category {
-            margin: 30px 0;
-            padding: 25px;
-            background: #f8f9fa;
+            margin: 20px 0;
             border-radius: 12px;
             border: 2px solid #001f3f;
-            border-left: 5px solid #001f3f;
+            overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,31,63,0.1);
         }
-        .category h2 {
-            color: #2c3e50;
-            font-size: 20px;
-            margin-bottom: 20px;
+        .category-header {
+            padding: 20px;
+            background: #001f3f;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        .category-header:hover {
+            background: #003366;
+        }
+        .category-title {
+            font-size: 18px;
+            font-weight: bold;
             display: flex;
             align-items: center;
             gap: 10px;
         }
         .category-count {
-            background: #001f3f;
-            color: white;
-            padding: 2px 12px;
+            background: white;
+            color: #001f3f;
+            padding: 3px 12px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 13px;
+        }
+        .category-toggle {
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+        .category-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+        .category-content {
+            padding: 20px;
+            background: #f8f9fa;
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+        .category-content.collapsed {
+            max-height: 0;
+            padding: 0 20px;
         }
         .news-item {
             margin: 15px 0;
@@ -262,24 +308,34 @@
         .update-time {
             text-align: center;
             color: #7f8c8d;
-            font-size: 13px;
-            margin-top: 15px;
+            font-size: 12px;
+            margin-top: 20px;
             padding: 10px;
             background: #f8f9fa;
             border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            .calendar-section {
+                position: relative;
+                top: 0;
+            }
         }
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
             }
             h1 {
-                font-size: 24px;
+                font-size: 22px;
             }
             .calendar-grid {
-                gap: 5px;
+                gap: 3px;
             }
             .calendar-day {
-                font-size: 12px;
+                font-size: 11px;
             }
         }
     </style>
@@ -293,24 +349,29 @@
         <h1>📰 Audit News Report</h1>
         <div class="subtitle">현대캐피탈 감사실 일일 뉴스 리포트</div>
 
-        <div class="calendar-selector">
-            <div class="calendar-header">
-                <div class="calendar-title" id="calendarTitle">2026년 6월</div>
-                <div class="calendar-nav">
-                    <button onclick="changeMonth(-1)">◀ 이전</button>
-                    <button onclick="changeMonth(1)">다음 ▶</button>
+        <div class="main-layout">
+            <div class="calendar-section">
+                <div class="calendar-selector">
+                    <div class="calendar-header">
+                        <div class="calendar-title" id="calendarTitle">2026년 6월</div>
+                        <div class="calendar-nav">
+                            <button onclick="changeMonth(-1)">◀</button>
+                            <button onclick="changeMonth(1)">▶</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- JavaScript로 렌더링 -->
+                    </div>
+                </div>
+                <div class="update-time" id="updateTime"></div>
+            </div>
+
+            <div class="content-section">
+                <div id="content">
+                    <div class="loading">데이터를 불러오는 중</div>
                 </div>
             </div>
-            <div class="calendar-grid" id="calendarGrid">
-                <!-- JavaScript로 렌더링 -->
-            </div>
         </div>
-
-        <div id="content">
-            <div class="loading">데이터를 불러오는 중</div>
-        </div>
-
-        <div class="update-time" id="updateTime"></div>
     </div>
 
     <script>
@@ -394,6 +455,15 @@
             loadNews(dateStr);
         }
 
+        // 카테고리 토글
+        function toggleCategory(categoryId) {
+            const content = document.getElementById(`content-${categoryId}`);
+            const toggle = document.getElementById(`toggle-${categoryId}`);
+
+            content.classList.toggle('collapsed');
+            toggle.classList.toggle('collapsed');
+        }
+
         // 뉴스 데이터 로드
         async function loadNews(date) {
             document.getElementById('content').innerHTML =
@@ -403,20 +473,26 @@
                 const response = await fetch(`data/${date}.json`);
                 const data = await response.json();
 
-                document.getElementById('updateTime').textContent =
-                    `📅 선택된 날짜: ${date} | 마지막 업데이트: ${new Date().toLocaleString('ko-KR')}`;
+                document.getElementById('updateTime').innerHTML =
+                    `📅 <strong>${date}</strong><br>마지막 업데이트: ${new Date().toLocaleString('ko-KR')}`;
 
                 let html = '';
 
                 if (Object.keys(data).length === 0) {
                     html = '<div class="no-data">😔 해당 날짜의 뉴스가 없습니다.</div>';
                 } else {
+                    let categoryIdx = 0;
                     for (const [category, newsList] of Object.entries(data)) {
-                        html += `<div class="category">
-                            <h2>
-                                ${category}
-                                <span class="category-count">${newsList.length}건</span>
-                            </h2>`;
+                        html += `
+                            <div class="category">
+                                <div class="category-header" onclick="toggleCategory(${categoryIdx})">
+                                    <div class="category-title">
+                                        ${category}
+                                        <span class="category-count">${newsList.length}건</span>
+                                    </div>
+                                    <div class="category-toggle" id="toggle-${categoryIdx}">▼</div>
+                                </div>
+                                <div class="category-content" id="content-${categoryIdx}">`;
 
                         newsList.forEach(news => {
                             const keywords = news.matched_keywords ?
@@ -435,7 +511,8 @@
                                 </div>`;
                         });
 
-                        html += '</div>';
+                        html += '</div></div>';
+                        categoryIdx++;
                     }
                 }
 
