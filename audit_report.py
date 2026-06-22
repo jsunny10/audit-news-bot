@@ -267,7 +267,7 @@ if __name__ == "__main__":
 
     if final_html_body:
         send_audit_report(final_html_body, image_file)
-      #  save_news_json(news_by_category, date_str)
+        save_news_json(news_by_category, date_str)
     else:
         print("수집된 뉴스가 없습니다.")
     
