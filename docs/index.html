@@ -1,1 +1,230 @@
-..
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit News Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 28px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .date-selector {
+            margin: 20px 0;
+            padding: 15px;
+            background: #ecf0f1;
+            border-radius: 5px;
+        }
+        .date-selector label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .date-selector select {
+            padding: 8px 15px;
+            font-size: 14px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .category {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .category h2 {
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .news-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+        .news-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .news-score {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .news-keywords {
+            display: inline-block;
+            color: #e67e22;
+            font-size: 11px;
+            margin-right: 8px;
+        }
+        .news-title {
+            display: block;
+            margin-top: 8px;
+            color: #1a0dab;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .news-title:hover {
+            text-decoration: underline;
+        }
+        .news-desc {
+            margin-top: 5px;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        .error {
+            padding: 20px;
+            background: #ffe6e6;
+            border-left: 4px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 5px;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+        .update-time {
+            text-align: right;
+            color: #7f8c8d;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📰 Audit News Report</h1>
+        <div class="update-time" id="updateTime"></div>
+
+        <div class="date-selector">
+            <label for="dateSelect">날짜 선택:</label>
+            <select id="dateSelect" onchange="loadNews()">
+                <option value="">로딩중...</option>
+            </select>
+        </div>
+
+        <div id="content">
+            <div class="loading">데이터를 불러오는 중...</div>
+        </div>
+    </div>
+
+    <script>
+        let dates = [];
+
+        // 날짜 목록 로드
+        async function loadDates() {
+            try {
+                const response = await fetch('data/index.json');
+                dates = await response.json();
+
+                const select = document.getElementById('dateSelect');
+                select.innerHTML = dates.map(date =>
+                    `<option value="${date}">${date}</option>`
+                ).join('');
+
+                // 최신 날짜 자동 로드
+                if (dates.length > 0) {
+                    loadNews(dates[0]);
+                }
+            } catch (error) {
+                document.getElementById('content').innerHTML =
+                    '<div class="error">날짜 목록을 불러오는데 실패했습니다.</div>';
+            }
+        }
+
+        // 뉴스 데이터 로드
+        async function loadNews(selectedDate) {
+            const date = selectedDate || document.getElementById('dateSelect').value;
+            if (!date) return;
+
+            document.getElementById('content').innerHTML =
+                '<div class="loading">데이터를 불러오는 중...</div>';
+
+            try {
+                const response = await fetch(`data/${date}.json`);
+                const data = await response.json();
+
+                document.getElementById('updateTime').textContent =
+                    `마지막 업데이트: ${date}`;
+
+                let html = '';
+
+                if (Object.keys(data).length === 0) {
+                    html = '<div class="no-data">해당 날짜의 뉴스가 없습니다.</div>';
+                } else {
+                    for (const [category, newsList] of Object.entries(data)) {
+                        html += `<div class="category">
+                            <h2>${category}</h2>`;
+
+                        newsList.forEach(news => {
+                            const keywords = news.matched_keywords ?
+                                news.matched_keywords.join(', ') : '';
+
+                            html += `
+                                <div class="news-item">
+                                    <div>
+                                        <span class="news-score">score: ${news.score}</span>
+                                        <span class="news-keywords">[${keywords}]</span>
+                                    </div>
+                                    <a href="${news.link}" target="_blank" class="news-title">
+                                        ${news.title}
+                                    </a>
+                                    <div class="news-desc">${news.desc}</div>
+                                </div>`;
+                        });
+
+                        html += '</div>';
+                    }
+                }
+
+                document.getElementById('content').innerHTML = html;
+            } catch (error) {
+                document.getElementById('content').innerHTML =
+                    '<div class="error">뉴스 데이터를 불러오는데 실패했습니다.</div>';
+            }
+        }
+
+        // 페이지 로드시 실행
+        loadDates();
+    </script>
+</body>
+</html>
