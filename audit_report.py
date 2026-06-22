@@ -98,8 +98,13 @@ def save_news_json(news_by_category, date_str):
 
     index_path = 'docs/data/index.json'
     if os.path.exists(index_path):
-        with open(index_path, 'r', encoding='utf-8') as f:
-            index = json.load(f)
+        try:
+            with open(index_path, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+                index = json.loads(content) if content else []
+        except (json.JSONDecodeError, ValueError):
+            print(f"⚠️  index.json 파싱 오류, 빈 배열로 초기화합니다.")
+            index = []
     else:
         index = []
 
