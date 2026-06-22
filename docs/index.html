@@ -12,143 +12,312 @@
         }
         body {
             font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            line-height: 1.6;
+        }
+        .header-banner {
+            max-width: 1000px;
+            margin: 0 auto 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .header-banner img {
+            width: 100%;
+            height: auto;
+            display: block;
         }
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
         h1 {
             color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 28px;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 32px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .date-selector {
-            margin: 20px 0;
-            padding: 15px;
-            background: #ecf0f1;
-            border-radius: 5px;
-        }
-        .date-selector label {
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        .date-selector select {
-            padding: 8px 15px;
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
             font-size: 14px;
-            border: 1px solid #bdc3c7;
-            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .calendar-selector {
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .calendar-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+        .calendar-nav button {
+            background: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 14px;
+            color: #667eea;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .calendar-nav button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            color: #555;
+            padding: 10px;
+            font-size: 13px;
+        }
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            color: #7f8c8d;
+            position: relative;
+        }
+        .calendar-day:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .calendar-day.has-data {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+        .calendar-day.has-data::after {
+            content: '•';
+            position: absolute;
+            bottom: 5px;
+            font-size: 18px;
+            color: #ffd700;
+        }
+        .calendar-day.selected {
+            background: #ff6b6b;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+        }
+        .calendar-day.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
         .category {
             margin: 30px 0;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            border-left: 4px solid #3498db;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
         .category h2 {
             color: #2c3e50;
-            font-size: 18px;
-            margin-bottom: 15px;
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .category-count {
+            background: #667eea;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 14px;
         }
         .news-item {
             margin: 15px 0;
-            padding: 15px;
+            padding: 20px;
             background: white;
-            border-radius: 5px;
+            border-radius: 10px;
             border: 1px solid #e0e0e0;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         .news-item:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102,126,234,0.3);
+            transform: translateY(-3px);
+            border-color: #667eea;
+        }
+        .news-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
         }
         .news-score {
-            display: inline-block;
-            background: #3498db;
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
+            padding: 5px 12px;
+            border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
-            margin-right: 8px;
         }
         .news-keywords {
             display: inline-block;
+            background: #ffe6e6;
             color: #e67e22;
+            padding: 5px 12px;
+            border-radius: 20px;
             font-size: 11px;
-            margin-right: 8px;
+            font-weight: 500;
         }
         .news-title {
             display: block;
-            margin-top: 8px;
-            color: #1a0dab;
+            margin-top: 10px;
+            color: #2c3e50;
             text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.5;
         }
         .news-title:hover {
+            color: #667eea;
             text-decoration: underline;
         }
         .news-desc {
-            margin-top: 5px;
+            margin-top: 10px;
             color: #666;
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 14px;
+            line-height: 1.6;
         }
         .loading {
             text-align: center;
-            padding: 40px;
+            padding: 60px;
             color: #7f8c8d;
+            font-size: 18px;
+        }
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
         }
         .error {
-            padding: 20px;
+            padding: 25px;
             background: #ffe6e6;
-            border-left: 4px solid #e74c3c;
+            border-left: 5px solid #e74c3c;
             color: #c0392b;
-            border-radius: 5px;
+            border-radius: 10px;
+            font-size: 15px;
         }
         .no-data {
             text-align: center;
-            padding: 40px;
+            padding: 60px;
             color: #95a5a6;
+            font-size: 18px;
         }
         .update-time {
-            text-align: right;
+            text-align: center;
             color: #7f8c8d;
-            font-size: 12px;
-            margin-top: 10px;
+            font-size: 13px;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .calendar-grid {
+                gap: 5px;
+            }
+            .calendar-day {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="header-banner">
+        <img src="image_news.jpeg" alt="Audit News Banner">
+    </div>
+
     <div class="container">
         <h1>📰 Audit News Report</h1>
-        <div class="update-time" id="updateTime"></div>
+        <div class="subtitle">현대캐피탈 감사실 일일 뉴스 리포트</div>
 
-        <div class="date-selector">
-            <label for="dateSelect">날짜 선택:</label>
-            <select id="dateSelect" onchange="loadNews()">
-                <option value="">로딩중...</option>
-            </select>
+        <div class="calendar-selector">
+            <div class="calendar-header">
+                <div class="calendar-title" id="calendarTitle">2026년 6월</div>
+                <div class="calendar-nav">
+                    <button onclick="changeMonth(-1)">◀ 이전</button>
+                    <button onclick="changeMonth(1)">다음 ▶</button>
+                </div>
+            </div>
+            <div class="calendar-grid">
+                <div class="calendar-day-header">일</div>
+                <div class="calendar-day-header">월</div>
+                <div class="calendar-day-header">화</div>
+                <div class="calendar-day-header">수</div>
+                <div class="calendar-day-header">목</div>
+                <div class="calendar-day-header">금</div>
+                <div class="calendar-day-header">토</div>
+                <div id="calendarDays"></div>
+            </div>
         </div>
 
         <div id="content">
-            <div class="loading">데이터를 불러오는 중...</div>
+            <div class="loading">데이터를 불러오는 중</div>
         </div>
+
+        <div class="update-time" id="updateTime"></div>
     </div>
 
     <script>
         let dates = [];
+        let currentDate = new Date();
+        let selectedDate = null;
 
         // 날짜 목록 로드
         async function loadDates() {
@@ -156,44 +325,92 @@
                 const response = await fetch('data/index.json');
                 dates = await response.json();
 
-                const select = document.getElementById('dateSelect');
-                select.innerHTML = dates.map(date =>
-                    `<option value="${date}">${date}</option>`
-                ).join('');
-
-                // 최신 날짜 자동 로드
                 if (dates.length > 0) {
-                    loadNews(dates[0]);
+                    selectedDate = dates[0];
+                    renderCalendar();
+                    loadNews(selectedDate);
                 }
             } catch (error) {
                 document.getElementById('content').innerHTML =
-                    '<div class="error">날짜 목록을 불러오는데 실패했습니다.</div>';
+                    '<div class="error">❌ 날짜 목록을 불러오는데 실패했습니다.</div>';
             }
         }
 
-        // 뉴스 데이터 로드
-        async function loadNews(selectedDate) {
-            const date = selectedDate || document.getElementById('dateSelect').value;
-            if (!date) return;
+        // 달력 렌더링
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
 
+            document.getElementById('calendarTitle').textContent =
+                `${year}년 ${month + 1}월`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+
+            let calendarHTML = '';
+
+            // 빈 칸 채우기
+            for (let i = 0; i < firstDay; i++) {
+                calendarHTML += '<div class="calendar-day disabled"></div>';
+            }
+
+            // 날짜 채우기
+            for (let day = 1; day <= lastDate; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const hasData = dates.includes(dateStr);
+                const isSelected = dateStr === selectedDate;
+
+                let classes = 'calendar-day';
+                if (hasData) classes += ' has-data';
+                if (isSelected) classes += ' selected';
+                if (!hasData) classes += ' disabled';
+
+                calendarHTML += `
+                    <div class="${classes}" onclick="selectDate('${dateStr}', ${hasData})">
+                        ${day}
+                    </div>`;
+            }
+
+            document.getElementById('calendarDays').innerHTML = calendarHTML;
+        }
+
+        // 월 변경
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        // 날짜 선택
+        function selectDate(dateStr, hasData) {
+            if (!hasData) return;
+            selectedDate = dateStr;
+            renderCalendar();
+            loadNews(dateStr);
+        }
+
+        // 뉴스 데이터 로드
+        async function loadNews(date) {
             document.getElementById('content').innerHTML =
-                '<div class="loading">데이터를 불러오는 중...</div>';
+                '<div class="loading">데이터를 불러오는 중</div>';
 
             try {
                 const response = await fetch(`data/${date}.json`);
                 const data = await response.json();
 
                 document.getElementById('updateTime').textContent =
-                    `마지막 업데이트: ${date}`;
+                    `📅 선택된 날짜: ${date} | 마지막 업데이트: ${new Date().toLocaleString('ko-KR')}`;
 
                 let html = '';
 
                 if (Object.keys(data).length === 0) {
-                    html = '<div class="no-data">해당 날짜의 뉴스가 없습니다.</div>';
+                    html = '<div class="no-data">😔 해당 날짜의 뉴스가 없습니다.</div>';
                 } else {
                     for (const [category, newsList] of Object.entries(data)) {
                         html += `<div class="category">
-                            <h2>${category}</h2>`;
+                            <h2>
+                                ${category}
+                                <span class="category-count">${newsList.length}건</span>
+                            </h2>`;
 
                         newsList.forEach(news => {
                             const keywords = news.matched_keywords ?
@@ -201,9 +418,9 @@
 
                             html += `
                                 <div class="news-item">
-                                    <div>
-                                        <span class="news-score">score: ${news.score}</span>
-                                        <span class="news-keywords">[${keywords}]</span>
+                                    <div class="news-meta">
+                                        <span class="news-score">⭐ ${news.score}점</span>
+                                        <span class="news-keywords">🏷️ ${keywords}</span>
                                     </div>
                                     <a href="${news.link}" target="_blank" class="news-title">
                                         ${news.title}
@@ -219,7 +436,7 @@
                 document.getElementById('content').innerHTML = html;
             } catch (error) {
                 document.getElementById('content').innerHTML =
-                    '<div class="error">뉴스 데이터를 불러오는데 실패했습니다.</div>';
+                    '<div class="error">❌ 뉴스 데이터를 불러오는데 실패했습니다.</div>';
             }
         }
 
