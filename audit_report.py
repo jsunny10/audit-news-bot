@@ -91,11 +91,17 @@ def get_naver_news_data(keyword, seen_texts, client_id, client_secret, days_to_f
 
 
 def save_news_json(news_by_category, date_str):
-    os.makedirs('docs/data', exist_ok=True)
+    # 월별 폴더 생성 (예: docs/data/2026-06/)
+    year_month = date_str[:7]  # "2026-06-23" -> "2026-06"
+    month_dir = f'docs/data/{year_month}'
+    os.makedirs(month_dir, exist_ok=True)
 
-    with open(f'docs/data/{date_str}.json', 'w', encoding='utf-8') as f:
+    # 월별 폴더에 JSON 저장
+    file_path = f'{month_dir}/{date_str}.json'
+    with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(news_by_category, f, ensure_ascii=False, indent=2)
 
+    # index.json 업데이트
     index_path = 'docs/data/index.json'
     if os.path.exists(index_path):
         try:
@@ -115,7 +121,7 @@ def save_news_json(news_by_category, date_str):
     with open(index_path, 'w', encoding='utf-8') as f:
         json.dump(index, f, ensure_ascii=False)
 
-    print(f"✅ JSON 저장 완료: docs/data/{date_str}.json")
+    print(f"✅ JSON 저장 완료: {file_path}")
 
 
 def send_audit_report(html_content, image_path):
