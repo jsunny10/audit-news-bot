@@ -1,9 +1,10 @@
 name: Daily Audit News Report
 
 on:
-  schedule:
-    # 한국시간 오전 8시 3분 (UTC 전날 23:03)
-    - cron: '3 23 * * *'
+  # 비활성화: Cron-job.org 사용 (batch-runner.yml)
+  # schedule:
+  #   # 한국시간 오전 8시 3분 (UTC 전날 23:03)
+  #   - cron: '3 23 * * *'
   workflow_dispatch:
 
 jobs:
