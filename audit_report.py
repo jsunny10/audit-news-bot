@@ -152,11 +152,9 @@ def send_audit_report(html_content, image_path):
                 <img src="cid:header_logo" style="max-width: 100%; height: auto; border: none;">
             </div>
             <p style="text-align: right; font-size: 9pt; color: #888;">발송 시각: {now_kst.strftime('%H:%M')}</p>
-            # url 제공 추가(20261127)
-            <p style="text-align: right; font-size: 10pt; color: #888; margin: 6px 0 0 0;">
-                <a href="{report_url}" style="color:#1a0dab; text-decoration:underline; font-weight:bold;">바로가기</ 해당 사이트에서 과거 뉴스 확인 가능합니다.</p>
-        
             <p style="font-size: 11pt; color: #000; font-weight: bold; margin: 5px 0 0 0; text-align: right;">※ 인터넷 공간, 외부메일조회 시스템에서 뉴스별 링크 접근이 가능합니다.</p>
+            <p style="text-align: right; font-size: 10pt; color: #888; margin: 6px 0 0 0;">
+                <a href="{report_url}" style="color:#1a0dab; text-decoration:underline; font-weight:bold;"> 바로가기</a> 해당 사이트에서 과거 뉴스 확인 가능합니다.</p>
             {html_content}
         </div>
     </body></html>
