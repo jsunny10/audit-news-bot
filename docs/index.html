@@ -171,14 +171,14 @@
     </div>
 
     <script>
-        const NEWS_PER_page = 10;
+        const NEWS_PER_PAGE = 10;
 
-        let correntPages = {};
-        let correntData = null; 
+        let currentPages = {};
+        let currentData = null; 
         
         const dateInput = document.getElementById('reportDate');
         const now = new Date(); 
-        const today = new Date(now.getTime() + 9 * 60 * 60 * 1000))
+        const today = new Date(now.getTime() + 9 * 60 * 60 * 1000)
             .toISOString().split('T')[0];
         dateInput.value = today;
 
@@ -193,7 +193,7 @@
             titleZone.innerText = `📅 ${dateStr} News Report`;
             container.innerHTML = '<p class="no-data">데이터를 불러오는 중입니다...</p>';
 
-            const ym = dataStr.slice(0, 7);
+            const ym = dateStr.slice(0, 7);
             fetch(`data/${ym}/${dateStr}.json`)
                 .then(response => {
                     if (!response.ok) throw new Error('해당 날짜에 생성된 리포트가 없습니다.');
@@ -217,18 +217,19 @@
 
             for(const [category, newsList] of Object.entries(currentData)) {
                 if (!newsList || newsList.length === 0) continue;
-                container.appenChild(renderCategoryBox(category, newsList));
+                container.appendChild(renderCategoryBox(category, newsList));
             }
         }
 
         function renderCategoryBox(category, newsList) {
             const totalPages = Math.ceil(newsList.length / NEWS_PER_PAGE);
 
-            if(!currentPages[category]) currentPages[dategory] =1;
+            if(!currentPages[category]) currentPages[category] =1;
             if(currentPages[category] > totalPages) currentPages[category] = totalPages;
 
             const page = currentPages[category];
-            const start = (page - 1) * NEWS_PER_PAGE);
+            const start = (page - 1) * NEWS_PER_PAGE;
+            const pageNews = newsList.slice(start, start + NEWS_PER_PAGE);
 
             const box = document.createElement('div');
             box.className = 'category-box';
@@ -236,9 +237,9 @@
             const title = document.createElement('div');
             title.className = 'category-title';
             title.textContent = category;
-            box.appendChile(title);
+            box.appendChild(title);
 
-            pageNes.forEach(news => {
+            pageNews.forEach(news => {
                 const item = document.createElement('div');
                 item.className = 'news-item';
 
@@ -268,7 +269,7 @@
         
         function createPagination(category, page, totalPages) {
             const pag = document.createElement('div');
-            pag.classNme = 'pagination';
+            pag.className = 'pagination';
 
             const prevBtn = document.createElement('button');
             prevBtn.textContent = '◀ 이전';
