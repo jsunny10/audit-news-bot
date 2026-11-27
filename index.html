@@ -115,6 +115,36 @@
             padding-top: 50px;
             font-size: 11pt;
         }
+
+        // 20261127 페이지 네이션 버튼 스타일 추가
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+            align-items: center;
+        }
+        .pagination button {
+            padding: 6px 14px;
+            font-size: 10pt;
+            border: 1px solid #cdb5e1;
+            border-radirs: 4px;
+            background: #fff;
+            color: #1e293b;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .pagination button:hover:not(:disabled) {
+            background: #e2e8f0;
+        }
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .pagination .page-info {
+            font-size: 10pt;
+            color: #64748b;
+        }
     </style>
 </head>
 <body>
@@ -135,12 +165,20 @@
         <div class="content">
             <h2 id="viewDateTitle">날짜를 선택해 주세요</h2>
             <div id="newsContainer">
-                <p class="no-data">좌측 달력에서 조회할 리포트 일자를 선택하시면 카테고리별 뉴스가 표시됩니다.</p>
+                <p class="no-data">좌측 달력에서 조회할 일자를 선택하시면 카테고리별 뉴스가 표시됩니다.</p>
             </div>
         </div>
     </div>
 
     <script>
+        // 20261127 추가 , 카테고리당 한 페이지 보여줄 뉴스 개수
+        const NEWS_PER_page = 10;
+
+        // 20261127 추가 , 카테고리별 현재 페이지 상태 (예 금감원)
+        let correntPages = {};
+        let correntData = null;   // 현재 로드된 데이터 보관 (페이지 이동시 재활용)
+        
+        
         // 오늘 날짜를 기본값으로 세팅
         const dateInput = document.getElementById('reportDate');
         const today = new Date().toISOString().split('T')[0];
@@ -166,35 +204,111 @@
                     return response.json();
                 })
                 .then(data => {
-                    container.innerHTML = ''; // 초기화
-                    
-                    // 카테고리별 반복 렌더링
-                    for (const [category, newsList] of Object.entries(data)) {
-                        if (newsList.length === 0) continue;
-
-                        let categoryHtml = `
-                            <div class="category-box">
-                                <div class="category-title">${category}</div>
-                        `;
-
-                        newsList.forEach(news => {
-                            categoryHtml += `
-                                <div class="news-item">
-                                    <div class="news-title">
-                                        <a href="${news.link}" target="_blank">${news.title}</a>
-                                    </div>
-                                    <div class="news-url">${news.link}</div>
-                                </div>
-                            `;
-                        });
-
-                        categoryHtml += `</div>`;
-                        container.innerHTML += categoryHtml;
-                    }
+                    currentData = data;
+                    currentPages = {};
+                    renderAll();
+//                    container.innerHTML = ''; // 날짜 바뀌면 페이지상태 초기화
                 })
                 .catch(error => {
-                    container.innerHTML = `<p class="no-data">⚠️ ${error.message}</p>`;
+                    currentData = null;
+                    container.innerHTML = `<p class="no-data"> ⚠️ ${error.message}</p>`;
                 });
+        }
+
+        // 20261127 추가 전체 카테고리를 현재 페이지 상태에 맞춰 다시 그리는 함수
+        function renderAll() {
+            const container = document.getElementByld('newsContainer');
+            container.innerHTML = '';
+
+            for(const [category, newsList] of Object.entries(currentData)) {
+                if (!newsList || newsList.length === 0) continue;
+                container.appenChild(renderCategoryBox(category, newsList));
+            }
+        }
+
+        // 20261127 추가, 카테고리 한개를 페이지네이션 포함해 그리는 함수
+        function renderCategoryBox(category, newsList) {
+            const totalPages = Math.ceil(newsList.length / NEWS_PER_PAGE);
+
+            // 현재 페이지 초기화/보정
+            if(!currentPages[category]) currentPages[dategory] =1;
+            if(currentPages[category] > totalPages) currentPages[category] = totalPages;
+
+            const page = currentPages[category];
+            const start = (page - 1) * NEWS_PER_PAGE);
+
+            // 카테고리 박스 생성
+            const box = document.createElement('div');
+            box.className = 'category-box';
+
+            const title = document.createElement('div');
+            title.className = 'category-title';
+            title.textContent = category;
+            box.appendChile(title);
+
+            // 현재 페이지 뉴스 렌더링
+            pageNes.forEach(news => {
+                const item = document.createElement('div');
+                item.className = 'news-item';
+
+                const t = document.createElement('div');
+                t.className = 'news-title';
+                const a = document.createElement('a');
+                a.href = news.link;
+                a.target = '_blank';
+                a.textContent = news.title;
+                t.appendChild(a);
+                item.appendChild(t);
+
+                const u = document.createElement('div');
+                u.className = 'news-url';
+                u.textContent = news.link;
+                item.appendChild(u);
+
+                box.appendChild(item);
+            });
+
+            // 20261127 페이지네이션 버튼 (1페이지 뿐이면 표시하지 않음)
+            if (totalPages > 1) {
+                box.appendChild(createPagination(category, page, totalPages));
+            }
+
+            return box;
+        }
+
+        // 20271127 이전/다음버튼과 페이지 표시를 만드는 함수
+        function createpagination(category, page, totalPages) {
+            const pag = document.createElement('div');
+            pag.classNme = 'pagination';
+
+            //이전 버튼
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '◀ 이전';
+            prevBtn.disabled = page <= 1;
+            prevBtn.addEventListener('click', () => {
+                currentPages[category]--;
+                renderAll();
+            });
+
+            // 페이지 정보 
+            const info = document.createElement('span');
+            info.className = 'page-info';
+            info.textcontent = `${page} / ${totalPages} 페이지`;
+
+            // 다음 버튼
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '다음 ▶';
+            nextBtn.disabled = page >= totalPages;
+            nextBtn.addEventListener('click', () => {
+                currentPages[category]++;
+                renderAll();
+            });
+
+            pag.appendChild(prevBtn);
+            pag.appendChild(info);
+            pag.appendChild(nextBtn);
+
+            return pag;            
         }
 
         // 초기 화면 구동
