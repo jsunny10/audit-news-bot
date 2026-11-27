@@ -126,7 +126,7 @@ def save_news_json(news_by_category, date_str):
 
 def send_audit_report(html_content, image_path):
     report_url = "https://jsunny10.github.io/audit-news-bot/"   # url 제공 추가(20261127)
-    send_email_addr = "hcsaudit.news@gmail.com"261127
+    send_email_addr = "hcsaudit.news@gmail.com"
     app_pw = os.getenv('EMAIL_PW')
     target_emails = os.getenv('TARGET_EMAILS')
     
