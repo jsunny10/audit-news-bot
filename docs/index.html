@@ -177,7 +177,9 @@
         let correntData = null; 
         
         const dateInput = document.getElementById('reportDate');
-        const today = new Date().toISOString().split('T')[0];
+        const now = new Date(); 
+        const today = new Date(now.getTime() + 9 * 60 * 60 * 1000))
+            .toISOString().split('T')[0];
         dateInput.value = today;
 
         dateInput.addEventListener('change', (e) => {
@@ -191,7 +193,8 @@
             titleZone.innerText = `📅 ${dateStr} News Report`;
             container.innerHTML = '<p class="no-data">데이터를 불러오는 중입니다...</p>';
 
-            fetch(`data/${dateStr}.json`)
+            const ym = dataStr.slice(0, 7);
+            fetch(`data/${ym}/${dateStr}.json`)
                 .then(response => {
                     if (!response.ok) throw new Error('해당 날짜에 생성된 리포트가 없습니다.');
                     return response.json();
