@@ -116,7 +116,7 @@
             font-size: 11pt;
         }
 
-        // 20261127 페이지 네이션 버튼 스타일 추가
+        /* 20261127 페이지 네이션 버튼 스타일 추가 */
         .pagination {
             display: flex;
             justify-content: center;
@@ -128,7 +128,7 @@
             padding: 6px 14px;
             font-size: 10pt;
             border: 1px solid #cdb5e1;
-            border-radirs: 4px;
+            border-radius: 4px;
             background: #fff;
             color: #1e293b;
             cursor: pointer;
@@ -149,7 +149,7 @@
 </head>
 <body>
 
-    <!-- 상단 배너 부착 (전달해주신 IMG_4068.jpg 매핑) -->
+    <!-- 상단 배너 -->
     <div class="header-banner">
         <img src="image_news.jpeg" alt="Audit News Banner">
     </div>
@@ -217,7 +217,7 @@
 
         // 20261127 추가 전체 카테고리를 현재 페이지 상태에 맞춰 다시 그리는 함수
         function renderAll() {
-            const container = document.getElementByld('newsContainer');
+            const container = document.getElementById('newsContainer');
             container.innerHTML = '';
 
             for(const [category, newsList] of Object.entries(currentData)) {
@@ -277,7 +277,7 @@
         }
 
         // 20271127 이전/다음버튼과 페이지 표시를 만드는 함수
-        function createpagination(category, page, totalPages) {
+        function createPagination(category, page, totalPages) {
             const pag = document.createElement('div');
             pag.classNme = 'pagination';
 
